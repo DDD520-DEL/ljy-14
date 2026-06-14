@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -88,4 +88,15 @@ export const mapApi = {
 
 export const battleApi = {
   getPair: () => request<BattlePair>('/battle/pair'),
+};
+
+export const commentApi = {
+  getTeamComments: (teamId: number) => request<TeamComment[]>(`/teams/${teamId}/comments`),
+  
+  createComment: (data: CreateCommentRequest) => request<CreateCommentResponse>(`/teams/${data.teamId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  getTeamRating: (teamId: number) => request<{ avgRating: number; totalComments: number }>(`/teams/${teamId}/comments/rating`),
 };

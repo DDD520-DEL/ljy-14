@@ -1,21 +1,39 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send } from 'lucide-react';
 import { useTeamStore } from '../store/useStore';
-import { Song } from '../../shared/types';
+import { Song, TeamComment } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import { voteApi } from '../services/api';
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { selectedTeam, teamSongs, loading, error, fetchTeamById, fetchTeamSongs, clearSelectedTeam } = useTeamStore();
+  const { 
+    selectedTeam, 
+    teamSongs, 
+    teamComments, 
+    commentsLoading, 
+    loading, 
+    error, 
+    fetchTeamById, 
+    fetchTeamSongs, 
+    fetchTeamComments,
+    addTeamComment,
+    clearSelectedTeam 
+  } = useTeamStore();
   const [activeTab, setActiveTab] = useState<'songs' | 'photos'>('songs');
   const [costumeMessage, setCostumeMessage] = useState('');
+  const [commentNickname, setCommentNickname] = useState('');
+  const [commentContent, setCommentContent] = useState('');
+  const [commentRating, setCommentRating] = useState(0);
+  const [commentSubmitMessage, setCommentSubmitMessage] = useState('');
+  const [commentSubmitted, setCommentSubmitted] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchTeamById(parseInt(id));
       fetchTeamSongs(parseInt(id));
+      fetchTeamComments(parseInt(id));
     }
     return () => clearSelectedTeam();
   }, [id]);
@@ -30,6 +48,69 @@ export default function TeamDetailPage() {
       setCostumeMessage('投票失败，请稍后重试');
       setTimeout(() => setCostumeMessage(''), 3000);
     }
+  };
+
+  const handleCommentRating = (score: number) => {
+    if (!commentSubmitted) {
+      setCommentRating(score);
+    }
+  };
+
+  const handleSubmitComment = async () => {
+    if (!selectedTeam) return;
+    if (!commentNickname.trim()) {
+      setCommentSubmitMessage('请输入昵称');
+      setTimeout(() => setCommentSubmitMessage(''), 3000);
+      return;
+    }
+    if (!commentContent.trim()) {
+      setCommentSubmitMessage('请输入留言内容');
+      setTimeout(() => setCommentSubmitMessage(''), 3000);
+      return;
+    }
+    if (commentRating === 0) {
+      setCommentSubmitMessage('请选择评分星级');
+      setTimeout(() => setCommentSubmitMessage(''), 3000);
+      return;
+    }
+
+    const result = await addTeamComment({
+      teamId: selectedTeam.id,
+      nickname: commentNickname.trim(),
+      content: commentContent.trim(),
+      rating: commentRating
+    });
+
+    setCommentSubmitMessage(result.message || '');
+    setTimeout(() => setCommentSubmitMessage(''), 3000);
+
+    if (result.success) {
+      setCommentNickname('');
+      setCommentContent('');
+      setCommentRating(0);
+      setCommentSubmitted(true);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 30) return `${days}天前`;
+    return date.toLocaleDateString('zh-CN');
+  };
+
+  const getAverageRating = () => {
+    if (teamComments.length === 0) return 0;
+    const total = teamComments.reduce((sum, c) => sum + c.rating, 0);
+    return total / teamComments.length;
   };
 
   if (loading) {
@@ -304,6 +385,149 @@ export default function TeamDetailPage() {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="border-t border-gray-100 pt-8 mt-8">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center space-x-2">
+                <MessageSquare className="w-6 h-6 text-orange-500" />
+                <span>舞队留言板</span>
+                {teamComments.length > 0 && (
+                  <span className="text-sm font-normal text-gray-500">
+                    （{teamComments.length}条评价，平均分 {getAverageRating().toFixed(1)}）
+                  </span>
+                )}
+              </h2>
+
+              <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-6 mb-8">
+                <h3 className="font-bold text-gray-800 mb-4">发表留言</h3>
+                <div className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">您的昵称</label>
+                      <input
+                        type="text"
+                        value={commentNickname}
+                        onChange={(e) => setCommentNickname(e.target.value)}
+                        placeholder="请输入昵称"
+                        maxLength={20}
+                        disabled={commentSubmitted}
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">打分</label>
+                      <div className="flex items-center space-x-1 py-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => handleCommentRating(star)}
+                            disabled={commentSubmitted}
+                            className={`${!commentSubmitted ? 'cursor-pointer transition-transform hover:scale-125' : 'cursor-default opacity-75'}`}
+                          >
+                            <Star
+                              className={`w-8 h-8 transition-all duration-200 ${
+                                star <= commentRating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                        {commentRating > 0 && (
+                          <span className="ml-3 text-sm font-medium text-gray-600">
+                            {commentRating} 星
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">留言内容</label>
+                    <textarea
+                      value={commentContent}
+                      onChange={(e) => setCommentContent(e.target.value)}
+                      placeholder="分享您对这个舞队的看法..."
+                      rows={3}
+                      maxLength={500}
+                      disabled={commentSubmitted}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 text-right">
+                      {commentContent.length}/500
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    {commentSubmitMessage && (
+                      <p className={`text-sm ${commentSubmitMessage.includes('成功') ? 'text-green-500' : 'text-red-500'}`}>
+                        {commentSubmitMessage}
+                      </p>
+                    )}
+                    {commentSubmitted && (
+                      <p className="text-sm text-green-500 flex items-center">
+                        <span className="mr-1">✓</span> 感谢您的评价！
+                      </p>
+                    )}
+                    <button
+                      onClick={handleSubmitComment}
+                      disabled={commentSubmitted}
+                      className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ml-auto"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>发布留言</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {commentsLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mx-auto"></div>
+                    <p className="text-gray-500 mt-4">加载留言中...</p>
+                  </div>
+                ) : teamComments.length > 0 ? (
+                  teamComments.map((comment: TeamComment, index: number) => (
+                    <div
+                      key={comment.id}
+                      className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-all animate-fadeInUp"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
+                            {comment.nickname.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-800">{comment.nickname}</p>
+                            <p className="text-xs text-gray-400">{formatDate(comment.createdAt)}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${
+                                star <= comment.rating
+                                  ? 'text-yellow-400 fill-current'
+                                  : 'text-gray-200'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+                        {comment.content}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p>暂无留言，快来发表第一条评价吧！</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

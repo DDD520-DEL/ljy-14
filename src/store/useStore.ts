@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi } from '../services/api';
 
 interface FilterState {
   district: string;
@@ -16,11 +16,16 @@ interface TeamState {
   teams: Team[];
   selectedTeam: Team | null;
   teamSongs: Song[];
+  teamComments: TeamComment[];
+  commentsLoading: boolean;
+  commentsError: string | null;
   loading: boolean;
   error: string | null;
   fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string }) => Promise<void>;
   fetchTeamById: (id: number) => Promise<void>;
   fetchTeamSongs: (teamId: number) => Promise<void>;
+  fetchTeamComments: (teamId: number) => Promise<void>;
+  addTeamComment: (data: CreateCommentRequest) => Promise<{ success: boolean; message?: string }>;
   clearSelectedTeam: () => void;
 }
 
@@ -71,6 +76,9 @@ export const useTeamStore = create<TeamState>((set) => ({
   teams: [],
   selectedTeam: null,
   teamSongs: [],
+  teamComments: [],
+  commentsLoading: false,
+  commentsError: null,
   loading: false,
   error: null,
   
@@ -104,7 +112,31 @@ export const useTeamStore = create<TeamState>((set) => ({
     }
   },
   
-  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [] }),
+  fetchTeamComments: async (teamId) => {
+    set({ commentsLoading: true, commentsError: null });
+    try {
+      const comments = await commentApi.getTeamComments(teamId);
+      set({ teamComments: comments, commentsLoading: false });
+    } catch (error) {
+      set({ commentsError: '获取评论列表失败', commentsLoading: false });
+    }
+  },
+  
+  addTeamComment: async (data) => {
+    try {
+      const result = await commentApi.createComment(data);
+      if (result.success && result.comment) {
+        set((state) => ({
+          teamComments: [result.comment!, ...state.teamComments]
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '发布留言失败' };
+    }
+  },
+  
+  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [] }),
 }));
 
 export const useRankingStore = create<RankingState>((set, get) => ({

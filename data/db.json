@@ -669,5 +669,127 @@
       "createdAt": "2024-03-01T14:15:00Z"
     }
   ],
-  "votes": []
+  "votes": [],
+  "comments": [
+    {
+      "id": 1,
+      "teamId": 1,
+      "nickname": "广场舞爱好者",
+      "content": "红扇舞跳得太精彩了！队形变化很有创意，队员们配合默契。",
+      "rating": 5,
+      "createdAt": "2024-05-10T08:30:00Z"
+    },
+    {
+      "id": 2,
+      "teamId": 1,
+      "nickname": "社区王阿姨",
+      "content": "每天早上都看她们跳舞，服装特别漂亮，精神头十足！",
+      "rating": 4,
+      "createdAt": "2024-05-12T10:15:00Z"
+    },
+    {
+      "id": 3,
+      "teamId": 1,
+      "nickname": "舞蹈小白",
+      "content": "想学她们的扇子舞，有没有教学视频呀？",
+      "rating": 5,
+      "createdAt": "2024-05-15T14:20:00Z"
+    },
+    {
+      "id": 4,
+      "teamId": 2,
+      "nickname": "潮流达人",
+      "content": "炫舞团的编舞太潮了，每次都有新惊喜！",
+      "rating": 5,
+      "createdAt": "2024-05-08T19:45:00Z"
+    },
+    {
+      "id": 5,
+      "teamId": 2,
+      "nickname": "广场舞新人",
+      "content": "年轻队员很多，气氛特别好，想加入！",
+      "rating": 4,
+      "createdAt": "2024-05-11T16:30:00Z"
+    },
+    {
+      "id": 6,
+      "teamId": 3,
+      "nickname": "古典舞迷",
+      "content": "茉莉花那支舞太美了，看得我热泪盈眶，真正的艺术！",
+      "rating": 5,
+      "createdAt": "2024-05-05T09:00:00Z"
+    },
+    {
+      "id": 7,
+      "teamId": 3,
+      "nickname": "文化传承者",
+      "content": "能坚持跳古典舞不容易，为你们点赞！",
+      "rating": 5,
+      "createdAt": "2024-05-09T11:30:00Z"
+    },
+    {
+      "id": 8,
+      "teamId": 4,
+      "nickname": "健身达人",
+      "content": "健身操动作标准，跟跳了一个月瘦了5斤，感谢！",
+      "rating": 5,
+      "createdAt": "2024-05-07T07:20:00Z"
+    },
+    {
+      "id": 9,
+      "teamId": 4,
+      "nickname": "退休老张",
+      "content": "动作强度适中，适合我们中老年人，音乐也很带劲！",
+      "rating": 4,
+      "createdAt": "2024-05-13T06:45:00Z"
+    },
+    {
+      "id": 10,
+      "teamId": 5,
+      "nickname": "爵士粉丝",
+      "content": "辣妈们太飒了！爵士舞跳出了专业水准，气场全开！",
+      "rating": 5,
+      "createdAt": "2024-05-06T20:10:00Z"
+    },
+    {
+      "id": 11,
+      "teamId": 5,
+      "nickname": "围观群众",
+      "content": "每次跳无价之姐都围满了人，太火了！",
+      "rating": 4,
+      "createdAt": "2024-05-14T21:00:00Z"
+    },
+    {
+      "id": 12,
+      "teamId": 6,
+      "nickname": "夕阳红粉丝",
+      "content": "叔叔阿姨们精气神太棒了，跳舞让你们更年轻！",
+      "rating": 5,
+      "createdAt": "2024-05-04T08:00:00Z"
+    },
+    {
+      "id": 13,
+      "teamId": 8,
+      "nickname": "草原儿女",
+      "content": "蒙古舞跳得太正宗了，仿佛看到了大草原！",
+      "rating": 5,
+      "createdAt": "2024-05-03T15:30:00Z"
+    },
+    {
+      "id": 14,
+      "teamId": 8,
+      "nickname": "民族舞爱好者",
+      "content": "盅碗舞太惊艳了，服装也特别有民族特色！",
+      "rating": 5,
+      "createdAt": "2024-05-16T10:45:00Z"
+    },
+    {
+      "id": 15,
+      "teamId": 9,
+      "nickname": "老北京",
+      "content": "秧歌扭得地道，年味十足！过年表演特别热闹！",
+      "rating": 5,
+      "createdAt": "2024-05-02T12:00:00Z"
+    }
+  ]
 }

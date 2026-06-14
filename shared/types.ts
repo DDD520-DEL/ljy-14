@@ -66,3 +66,25 @@ export interface VoteResponse {
   totalVotes: number;
   message?: string;
 }
+
+export interface TeamComment {
+  id: number;
+  teamId: number;
+  nickname: string;
+  content: string;
+  rating: number;
+  createdAt: string;
+}
+
+export interface CreateCommentRequest {
+  teamId: number;
+  nickname: string;
+  content: string;
+  rating: number;
+}
+
+export interface CreateCommentResponse {
+  success: boolean;
+  comment?: TeamComment;
+  message?: string;
+}
