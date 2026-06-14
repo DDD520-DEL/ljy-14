@@ -77,6 +77,9 @@ export const rankingApi = {
   getAddict: (limit?: number) => 
     request<(Song & { teamName: string })[]>(`/ranking/addict${limit ? `?limit=${limit}` : ''}`),
   
+  getWeeklyAddict: (limit?: number) => 
+    request<(Song & { teamName: string; weeklyAddictScore: number; weeklyAddictVotes: number })[]>(`/ranking/addict/weekly${limit ? `?limit=${limit}` : ''}`),
+  
   getCostume: (limit?: number) => 
     request<Team[]>(`/ranking/costume${limit ? `?limit=${limit}` : ''}`),
 };

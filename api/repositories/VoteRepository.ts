@@ -35,4 +35,25 @@ export class VoteRepository {
       votes: votes.length
     };
   }
+
+  async findByTypeAndTargetSince(type: 'addict' | 'costume', targetId: number, sinceDate: Date): Promise<VoteRecord[]> {
+    await db.read();
+    return db.data.votes.filter(v => 
+      v.type === type && 
+      v.targetId === targetId && 
+      new Date(v.createdAt) >= sinceDate
+    );
+  }
+
+  async getAverageScoreSince(type: 'addict' | 'costume', targetId: number, sinceDate: Date): Promise<{ score: number; votes: number }> {
+    const votes = await this.findByTypeAndTargetSince(type, targetId, sinceDate);
+    if (votes.length === 0) {
+      return { score: 0, votes: 0 };
+    }
+    const total = votes.reduce((sum, v) => sum + v.score, 0);
+    return {
+      score: Math.round((total / votes.length) * 100) / 100,
+      votes: votes.length
+    };
+  }
 }

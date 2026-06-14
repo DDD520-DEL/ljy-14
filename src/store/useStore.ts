@@ -33,19 +33,23 @@ interface TeamState {
 interface RankingState {
   comprehensiveRanking: Team[];
   addictRanking: (Song & { teamName: string })[];
+  weeklyAddictRanking: (Song & { teamName: string; weeklyAddictScore: number; weeklyAddictVotes: number })[];
   costumeRanking: Team[];
   loading: {
     comprehensive: boolean;
     addict: boolean;
+    weeklyAddict: boolean;
     costume: boolean;
   };
   error: {
     comprehensive: string | null;
     addict: string | null;
+    weeklyAddict: string | null;
     costume: string | null;
   };
   fetchComprehensiveRanking: (limit?: number) => Promise<void>;
   fetchAddictRanking: (limit?: number) => Promise<void>;
+  fetchWeeklyAddictRanking: (limit?: number) => Promise<void>;
   fetchCostumeRanking: (limit?: number) => Promise<void>;
   fetchAllRankings: () => Promise<void>;
 }
@@ -143,15 +147,18 @@ export const useTeamStore = create<TeamState>((set) => ({
 export const useRankingStore = create<RankingState>((set, get) => ({
   comprehensiveRanking: [],
   addictRanking: [],
+  weeklyAddictRanking: [],
   costumeRanking: [],
   loading: {
     comprehensive: false,
     addict: false,
+    weeklyAddict: false,
     costume: false,
   },
   error: {
     comprehensive: null,
     addict: null,
+    weeklyAddict: null,
     costume: null,
   },
   
@@ -175,6 +182,16 @@ export const useRankingStore = create<RankingState>((set, get) => ({
     }
   },
   
+  fetchWeeklyAddictRanking: async (limit) => {
+    set({ loading: { ...get().loading, weeklyAddict: true }, error: { ...get().error, weeklyAddict: null } });
+    try {
+      const data = await rankingApi.getWeeklyAddict(limit);
+      set({ weeklyAddictRanking: data, loading: { ...get().loading, weeklyAddict: false } });
+    } catch (error) {
+      set({ error: { ...get().error, weeklyAddict: '获取本周热门排行榜失败' }, loading: { ...get().loading, weeklyAddict: false } });
+    }
+  },
+  
   fetchCostumeRanking: async (limit) => {
     set({ loading: { ...get().loading, costume: true }, error: { ...get().error, costume: null } });
     try {
@@ -189,6 +206,7 @@ export const useRankingStore = create<RankingState>((set, get) => ({
     await Promise.all([
       get().fetchComprehensiveRanking(),
       get().fetchAddictRanking(),
+      get().fetchWeeklyAddictRanking(),
       get().fetchCostumeRanking(),
     ]);
   },

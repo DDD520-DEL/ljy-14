@@ -22,6 +22,10 @@ export class SongService {
     return songRepository.getAddictRanking(limit);
   }
 
+  async getWeeklyAddictRanking(limit?: number): Promise<(Song & { weeklyAddictScore: number; weeklyAddictVotes: number })[]> {
+    return songRepository.getWeeklyAddictRanking(limit);
+  }
+
   async getBattlePair(): Promise<BattlePair | null> {
     const pair = await songRepository.getRandomPair();
     if (!pair) return null;

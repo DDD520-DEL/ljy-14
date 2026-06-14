@@ -1,5 +1,8 @@
 import { db, saveDatabase } from '../db/database.js';
 import { Song } from '../../shared/types.js';
+import { VoteRepository } from './VoteRepository.js';
+
+const voteRepository = new VoteRepository();
 
 export class SongRepository {
   async findByTeamId(teamId: number): Promise<Song[]> {
@@ -61,5 +64,28 @@ export class SongRepository {
     
     const shuffled = songs.sort(() => Math.random() - 0.5);
     return [shuffled[0], shuffled[1]];
+  }
+
+  async getWeeklyAddictRanking(limit: number = 10): Promise<(Song & { weeklyAddictScore: number; weeklyAddictVotes: number })[]> {
+    await db.read();
+    const songs = [...db.data.songs];
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const songsWithWeeklyData = await Promise.all(
+      songs.map(async (song) => {
+        const { score, votes } = await voteRepository.getAverageScoreSince('addict', song.id, sevenDaysAgo);
+        return {
+          ...song,
+          weeklyAddictScore: score,
+          weeklyAddictVotes: votes
+        };
+      })
+    );
+
+    return songsWithWeeklyData
+      .filter(s => s.weeklyAddictVotes > 0)
+      .sort((a, b) => b.weeklyAddictScore - a.weeklyAddictScore)
+      .slice(0, limit);
   }
 }
