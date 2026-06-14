@@ -241,9 +241,17 @@ export default function TeamDetailPage() {
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
-                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white">
-                              <Music className="w-7 h-7" />
-                            </div>
+                            {song.coverUrl ? (
+                              <img
+                                src={song.coverUrl}
+                                alt={song.title}
+                                className="w-14 h-14 rounded-xl object-cover shadow-md"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white">
+                                <Music className="w-7 h-7" />
+                              </div>
+                            )}
                             <div>
                               <h4 className="font-bold text-gray-800 text-lg" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
                                 {song.title}

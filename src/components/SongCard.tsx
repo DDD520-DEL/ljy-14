@@ -39,9 +39,17 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-start space-x-4">
-        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center flex-shrink-0 shadow-lg">
-          <Music className="w-8 h-8 text-white" />
-        </div>
+        {song.coverUrl ? (
+          <img
+            src={song.coverUrl}
+            alt={song.title}
+            className="w-16 h-16 rounded-xl object-cover flex-shrink-0 shadow-lg"
+          />
+        ) : (
+          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+            <Music className="w-8 h-8 text-white" />
+          </div>
+        )}
 
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between">
