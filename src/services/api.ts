@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -59,15 +59,28 @@ export const teamApi = {
 };
 
 export const voteApi = {
-  voteAddict: (songId: number, score: number) => request<VoteResponse>('/votes/addict', {
+  voteAddict: (songId: number, score: number, userId: number) => request<VoteResponse>('/votes/addict', {
     method: 'POST',
-    body: JSON.stringify({ songId, score }),
+    body: JSON.stringify({ songId, score, userId }),
   }),
   
-  voteCostume: (teamId: number, score: number) => request<VoteResponse>('/votes/costume', {
+  voteCostume: (teamId: number, score: number, userId: number) => request<VoteResponse>('/votes/costume', {
     method: 'POST',
-    body: JSON.stringify({ teamId, score }),
+    body: JSON.stringify({ teamId, score, userId }),
   }),
+};
+
+export const userApi = {
+  createUser: (data: CreateUserRequest) => request<UserResponse>('/users', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  
+  getUser: (id: number) => request<User>(`/users/${id}`),
+  
+  getUserVotes: (id: number) => request<VoteRecordWithDetails[]>(`/users/${id}/votes`),
+  
+  getUserComments: (id: number) => request<TeamCommentWithTeam[]>(`/users/${id}/comments`),
 };
 
 export const rankingApi = {

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, Users, Map, Trophy, Swords, Menu, X, Heart } from 'lucide-react';
-import { useFavoriteStore } from '../store/useStore';
+import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User } from 'lucide-react';
+import { useFavoriteStore, useUserStore } from '../store/useStore';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const { favoriteIds } = useFavoriteStore();
+  const { user, setShowNicknameModal } = useUserStore();
 
   const navLinks = [
     { path: '/', label: '首页', icon: Music },
@@ -54,6 +55,31 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
+            <div className="ml-2">
+              {user ? (
+                <Link
+                  to="/profile"
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                    isActive('/profile')
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg scale-105'
+                      : 'bg-orange-50 text-orange-600 hover:bg-orange-100'
+                  }`}
+                >
+                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-xs font-bold">
+                    {user.nickname.charAt(0)}
+                  </div>
+                  <span className="font-medium">{user.nickname}</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => setShowNicknameModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium hover:shadow-lg hover:scale-105 transition-all duration-300"
+                >
+                  <User className="w-4 h-4" />
+                  <span>登录</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <button
@@ -93,6 +119,39 @@ export default function Navbar() {
                   )}
                 </Link>
               ))}
+              <div className="border-t border-gray-100 pt-2 mt-2">
+                {user ? (
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+                      isActive('/profile')
+                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                        : 'text-gray-700 hover:bg-orange-50'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white text-sm font-bold">
+                        {user.nickname.charAt(0)}
+                      </div>
+                      <span className="font-medium">个人中心</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setShowNicknameModal(true);
+                    }}
+                    className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <User className="w-5 h-5" />
+                      <span className="font-medium">登录</span>
+                    </div>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         )}

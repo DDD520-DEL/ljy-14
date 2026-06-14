@@ -1,5 +1,5 @@
 import { CommentRepository } from '../repositories/CommentRepository.js';
-import { TeamComment, CreateCommentRequest, CreateCommentResponse } from '../../shared/types.js';
+import { TeamComment, CreateCommentRequest, CreateCommentResponse, TeamCommentWithTeam } from '../../shared/types.js';
 
 const commentRepository = new CommentRepository();
 
@@ -28,5 +28,9 @@ export class CommentService {
 
   async getTeamRating(teamId: number): Promise<{ avgRating: number; totalComments: number }> {
     return commentRepository.getAverageRating(teamId);
+  }
+
+  async getUserComments(userId: number): Promise<TeamCommentWithTeam[]> {
+    return commentRepository.findByUserIdWithTeam(userId);
   }
 }

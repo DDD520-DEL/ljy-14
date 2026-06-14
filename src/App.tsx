@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import NicknameModal from "@/components/NicknameModal";
 import HomePage from "@/pages/HomePage";
 import TeamListPage from "@/pages/TeamListPage";
 import TeamDetailPage from "@/pages/TeamDetailPage";
@@ -7,6 +8,7 @@ import BattlePage from "@/pages/BattlePage";
 import MapPage from "@/pages/MapPage";
 import RankingPage from "@/pages/RankingPage";
 import FavoritesPage from "@/pages/FavoritesPage";
+import ProfilePage from "@/pages/ProfilePage";
 
 export default function App() {
   return (
@@ -21,7 +23,9 @@ export default function App() {
           <Route path="/battle" element={<BattlePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Routes>
+        <NicknameModal />
       </div>
     </Router>
   );

@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Swords, RefreshCw, Heart, Music, Zap } from 'lucide-react';
-import { useBattleStore } from '../store/useStore';
+import { Swords, RefreshCw, Heart, Music, Zap, User } from 'lucide-react';
+import { useBattleStore, useUserStore } from '../store/useStore';
 import { Link } from 'react-router-dom';
 
 export default function BattlePage() {
   const { battlePair, fetchBattlePair, voteAddict } = useBattleStore();
+  const { user, setShowNicknameModal } = useUserStore();
   const [votedSong1, setVotedSong1] = useState(false);
   const [votedSong2, setVotedSong2] = useState(false);
   const [message, setMessage] = useState('');
@@ -17,11 +18,16 @@ export default function BattlePage() {
   const handleVote = async (songId: number, isSong1: boolean) => {
     if ((isSong1 && votedSong1) || (!isSong1 && votedSong2)) return;
     
+    if (!user) {
+      setShowNicknameModal(true);
+      return;
+    }
+    
     setShowAnimation(songId);
     setTimeout(() => setShowAnimation(null), 1000);
 
     const score = 5;
-    const result = await voteAddict(songId, score);
+    const result = await voteAddict(songId, score, user.id);
     
     if (result.success) {
       if (isSong1) setVotedSong1(true);

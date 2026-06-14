@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -66,7 +66,7 @@ interface RankingState {
 interface BattleState {
   battlePair: BattlePair | null;
   fetchBattlePair: () => Promise<void>;
-  voteAddict: (songId: number, score: number) => Promise<{ success: boolean; message?: string }>;
+  voteAddict: (songId: number, score: number, userId: number) => Promise<{ success: boolean; message?: string }>;
 }
 
 interface MapState {
@@ -321,9 +321,9 @@ export const useBattleStore = create<BattleState>((set) => ({
     }
   },
   
-  voteAddict: async (songId, score) => {
+  voteAddict: async (songId, score, userId) => {
     try {
-      const result = await voteApi.voteAddict(songId, score);
+      const result = await voteApi.voteAddict(songId, score, userId);
       if (result.success) {
         set((state) => {
           if (!state.battlePair) return state;
@@ -384,6 +384,82 @@ export const useFavoriteStore = create<FavoriteState>()(
     {
       name: 'team-favorites',
       storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
+
+interface UserState {
+  user: User | null;
+  userVotes: VoteRecordWithDetails[];
+  userComments: TeamCommentWithTeam[];
+  showNicknameModal: boolean;
+  loading: boolean;
+  error: string | null;
+  setShowNicknameModal: (show: boolean) => void;
+  loginOrRegister: (nickname: string) => Promise<{ success: boolean; message?: string }>;
+  logout: () => void;
+  fetchUserVotes: () => Promise<void>;
+  fetchUserComments: () => Promise<void>;
+}
+
+export const useUserStore = create<UserState>()(
+  persist(
+    (set, get) => ({
+      user: null,
+      userVotes: [],
+      userComments: [],
+      showNicknameModal: false,
+      loading: false,
+      error: null,
+      
+      setShowNicknameModal: (show) => set({ showNicknameModal: show }),
+      
+      loginOrRegister: async (nickname) => {
+        set({ loading: true, error: null });
+        try {
+          const result = await userApi.createUser({ nickname });
+          if (result.success && result.user) {
+            set({ user: result.user, loading: false, showNicknameModal: false });
+            return { success: true, message: result.message };
+          }
+          set({ loading: false, error: result.message });
+          return { success: false, message: result.message };
+        } catch (error) {
+          set({ loading: false, error: '登录失败，请重试' });
+          return { success: false, message: '登录失败，请重试' };
+        }
+      },
+      
+      logout: () => {
+        set({ user: null, userVotes: [], userComments: [] });
+      },
+      
+      fetchUserVotes: async () => {
+        const { user } = get();
+        if (!user) return;
+        try {
+          const votes = await userApi.getUserVotes(user.id);
+          set({ userVotes: votes });
+        } catch (error) {
+          console.error('获取用户投票记录失败', error);
+        }
+      },
+      
+      fetchUserComments: async () => {
+        const { user } = get();
+        if (!user) return;
+        try {
+          const comments = await userApi.getUserComments(user.id);
+          set({ userComments: comments });
+        } catch (error) {
+          console.error('获取用户留言记录失败', error);
+        }
+      },
+    }),
+    {
+      name: 'user-info',
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => ({ user: state.user }),
     }
   )
 );

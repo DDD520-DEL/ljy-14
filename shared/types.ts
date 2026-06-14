@@ -33,13 +33,27 @@ export interface Song {
   createdAt: string;
 }
 
+export interface User {
+  id: number;
+  nickname: string;
+  avatar?: string;
+  createdAt: string;
+}
+
 export interface VoteRecord {
   id: number;
   type: 'addict' | 'costume';
   targetId: number;
+  userId: number;
   userIp: string;
   score: number;
   createdAt: string;
+}
+
+export interface VoteRecordWithDetails extends VoteRecord {
+  targetName?: string;
+  targetPhoto?: string;
+  teamName?: string;
 }
 
 export interface TeamWithSongs extends Team {
@@ -70,17 +84,35 @@ export interface VoteResponse {
 export interface TeamComment {
   id: number;
   teamId: number;
+  userId?: number;
   nickname: string;
   content: string;
   rating: number;
   createdAt: string;
 }
 
+export interface TeamCommentWithTeam extends TeamComment {
+  teamName?: string;
+  teamAvatar?: string;
+}
+
 export interface CreateCommentRequest {
   teamId: number;
+  userId?: number;
   nickname: string;
   content: string;
   rating: number;
+}
+
+export interface CreateUserRequest {
+  nickname: string;
+  deviceId?: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  user?: User;
+  message?: string;
 }
 
 export interface CreateCommentResponse {

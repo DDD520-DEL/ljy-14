@@ -1,5 +1,5 @@
 import { db, saveDatabase } from '../db/database.js';
-import { TeamComment, CreateCommentRequest } from '../../shared/types.js';
+import { TeamComment, CreateCommentRequest, TeamCommentWithTeam } from '../../shared/types.js';
 
 export class CommentRepository {
   async findByTeamId(teamId: number): Promise<TeamComment[]> {
@@ -14,6 +14,7 @@ export class CommentRepository {
     const newComment: TeamComment = {
       id: Math.max(0, ...db.data.comments.map(c => c.id)) + 1,
       teamId: data.teamId,
+      userId: data.userId,
       nickname: data.nickname,
       content: data.content,
       rating: data.rating,
@@ -35,5 +36,19 @@ export class CommentRepository {
       avgRating: total / teamComments.length,
       totalComments: teamComments.length
     };
+  }
+
+  async findByUserIdWithTeam(userId: number): Promise<TeamCommentWithTeam[]> {
+    await db.read();
+    const userComments = db.data.comments.filter(c => c.userId === userId);
+    
+    return userComments.map(comment => {
+      const team = db.data.teams.find(t => t.id === comment.teamId);
+      return {
+        ...comment,
+        teamName: team?.name,
+        teamAvatar: team?.avatar
+      };
+    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 }

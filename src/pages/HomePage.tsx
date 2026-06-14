@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Swords, Trophy, Map, Users, Heart, ChevronRight, Sparkles } from 'lucide-react';
-import { useTeamStore, useBattleStore, useRankingStore, useFilterStore } from '../store/useStore';
+import { useTeamStore, useBattleStore, useRankingStore, useFilterStore, useUserStore } from '../store/useStore';
 import TeamCard from '../components/TeamCard';
 import FilterBar from '../components/FilterBar';
 import SongCard from '../components/SongCard';
@@ -11,6 +11,7 @@ export default function HomePage() {
   const { battlePair, fetchBattlePair, voteAddict } = useBattleStore();
   const { comprehensiveRanking, fetchComprehensiveRanking } = useRankingStore();
   const { district, style, memberCount } = useFilterStore();
+  const { user, setShowNicknameModal } = useUserStore();
   const [heroIndex, setHeroIndex] = useState(0);
 
   useEffect(() => {
@@ -27,7 +28,11 @@ export default function HomePage() {
   }, [comprehensiveRanking.length]);
 
   const handleBattleVote = async (songId: number, score: number) => {
-    await voteAddict(songId, score);
+    if (!user) {
+      setShowNicknameModal(true);
+      return;
+    }
+    await voteAddict(songId, score, user.id);
   };
 
   return (

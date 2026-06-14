@@ -6,10 +6,10 @@ const voteService = new VoteService();
 export class VoteController {
   async voteAddict(req: Request, res: Response): Promise<void> {
     try {
-      const { songId, score } = req.body;
+      const { songId, score, userId } = req.body;
       const userIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
       
-      if (!songId || !score) {
+      if (!songId || !score || !userId) {
         res.status(400).json({ error: '缺少必要参数' });
         return;
       }
@@ -17,6 +17,7 @@ export class VoteController {
       const result = await voteService.voteAddict(
         parseInt(songId),
         parseInt(score),
+        parseInt(userId),
         userIp
       );
 
@@ -33,10 +34,10 @@ export class VoteController {
 
   async voteCostume(req: Request, res: Response): Promise<void> {
     try {
-      const { teamId, score } = req.body;
+      const { teamId, score, userId } = req.body;
       const userIp = req.ip || req.socket.remoteAddress || '127.0.0.1';
       
-      if (!teamId || !score) {
+      if (!teamId || !score || !userId) {
         res.status(400).json({ error: '缺少必要参数' });
         return;
       }
@@ -44,6 +45,7 @@ export class VoteController {
       const result = await voteService.voteCostume(
         parseInt(teamId),
         parseInt(score),
+        parseInt(userId),
         userIp
       );
 

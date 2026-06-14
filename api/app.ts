@@ -20,6 +20,7 @@ import mapRoutes from './routes/map.js'
 import battleRoutes from './routes/battle.js'
 import commentsRoutes from './routes/comments.js'
 import invitationsRoutes from './routes/invitations.js'
+import usersRoutes from './routes/users.js'
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url)
@@ -50,6 +51,7 @@ app.use('/api/map', mapRoutes)
 app.use('/api/battle', battleRoutes)
 app.use('/api', commentsRoutes)
 app.use('/api/invitations', invitationsRoutes)
+app.use('/api/users', usersRoutes)
 
 /**
  * health

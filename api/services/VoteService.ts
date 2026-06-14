@@ -1,15 +1,15 @@
 import { VoteRepository } from '../repositories/VoteRepository.js';
 import { TeamRepository } from '../repositories/TeamRepository.js';
 import { SongRepository } from '../repositories/SongRepository.js';
-import { VoteResponse } from '../../shared/types.js';
+import { VoteResponse, VoteRecordWithDetails } from '../../shared/types.js';
 
 const voteRepository = new VoteRepository();
 const teamRepository = new TeamRepository();
 const songRepository = new SongRepository();
 
 export class VoteService {
-  async voteAddict(songId: number, score: number, userIp: string): Promise<VoteResponse> {
-    const existingVote = await voteRepository.findByUserIp('addict', songId, userIp);
+  async voteAddict(songId: number, score: number, userId: number, userIp: string): Promise<VoteResponse> {
+    const existingVote = await voteRepository.findByUserId('addict', songId, userId);
     if (existingVote) {
       return {
         success: false,
@@ -22,6 +22,7 @@ export class VoteService {
     await voteRepository.create({
       type: 'addict',
       targetId: songId,
+      userId,
       userIp,
       score
     });
@@ -37,8 +38,8 @@ export class VoteService {
     };
   }
 
-  async voteCostume(teamId: number, score: number, userIp: string): Promise<VoteResponse> {
-    const existingVote = await voteRepository.findByUserIp('costume', teamId, userIp);
+  async voteCostume(teamId: number, score: number, userId: number, userIp: string): Promise<VoteResponse> {
+    const existingVote = await voteRepository.findByUserId('costume', teamId, userId);
     if (existingVote) {
       return {
         success: false,
@@ -51,6 +52,7 @@ export class VoteService {
     await voteRepository.create({
       type: 'costume',
       targetId: teamId,
+      userId,
       userIp,
       score
     });
@@ -64,5 +66,9 @@ export class VoteService {
       totalVotes: votes,
       message: '投票成功！'
     };
+  }
+
+  async getUserVotes(userId: number): Promise<VoteRecordWithDetails[]> {
+    return voteRepository.findByUserIdWithDetails(userId);
   }
 }

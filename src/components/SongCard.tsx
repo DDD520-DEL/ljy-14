@@ -3,6 +3,7 @@ import { Song } from '../../shared/types';
 import StarRating from './StarRating';
 import { voteApi } from '../services/api';
 import { useState } from 'react';
+import { useUserStore } from '../store/useStore';
 
 interface SongCardProps {
   song: Song;
@@ -12,13 +13,18 @@ interface SongCardProps {
 }
 
 export default function SongCard({ song, showVote = true, teamName, delay = 0 }: SongCardProps) {
+  const { user, setShowNicknameModal } = useUserStore();
   const [localScore, setLocalScore] = useState(song.addictScore);
   const [localVotes, setLocalVotes] = useState(song.addictVotes);
   const [message, setMessage] = useState('');
 
   const handleVote = async (score: number) => {
+    if (!user) {
+      setShowNicknameModal(true);
+      return;
+    }
     try {
-      const result = await voteApi.voteAddict(song.id, score);
+      const result = await voteApi.voteAddict(song.id, score, user.id);
       if (result.success) {
         setLocalScore(result.newScore);
         setLocalVotes(result.totalVotes);

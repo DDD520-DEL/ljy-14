@@ -1,6 +1,6 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { Team, Song, VoteRecord, TeamComment, DanceInvitation } from '../../shared/types.js';
+import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User } from '../../shared/types.js';
 import { mockTeams, mockSongs, mockComments } from './mockData.js';
 
 export interface DatabaseSchema {
@@ -9,6 +9,7 @@ export interface DatabaseSchema {
   votes: VoteRecord[];
   comments: TeamComment[];
   invitations: DanceInvitation[];
+  users: User[];
 }
 
 const file = './data/db.json';
@@ -19,12 +20,13 @@ const defaultData: DatabaseSchema = {
   songs: [],
   votes: [],
   comments: [],
-  invitations: []
+  invitations: [],
+  users: []
 };
 
 export const db = new Low<DatabaseSchema>(adapter, defaultData);
 
-function generateMockVotes(songs: Song[]): VoteRecord[] {
+function generateMockVotes(songs: Song[], userCount: number): VoteRecord[] {
   const votes: VoteRecord[] = [];
   let voteId = 1;
   const now = new Date();
@@ -41,6 +43,7 @@ function generateMockVotes(songs: Song[]): VoteRecord[] {
         id: voteId++,
         type: 'addict',
         targetId: song.id,
+        userId: Math.floor(Math.random() * userCount) + 1,
         userIp: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
         score: Math.floor(Math.random() * 2) + 4,
         createdAt: voteDate.toISOString()
@@ -60,6 +63,7 @@ function generateMockVotes(songs: Song[]): VoteRecord[] {
         id: voteId++,
         type: 'costume',
         targetId: team.id,
+        userId: Math.floor(Math.random() * userCount) + 1,
         userIp: `10.0.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
         score: Math.floor(Math.random() * 2) + 4,
         createdAt: voteDate.toISOString()
@@ -70,6 +74,26 @@ function generateMockVotes(songs: Song[]): VoteRecord[] {
   return votes;
 }
 
+function generateMockUsers(): User[] {
+  const nicknames = ['广场舞达人', '舞林高手', '快乐舞者', '夕阳红', '翩翩少年', '舞动人生', '快乐大妈', '健身达人', '舞蹈爱好者', '舞王争霸'];
+  const users: User[] = [];
+  const now = new Date();
+
+  for (let i = 0; i < 10; i++) {
+    const daysAgo = Math.floor(Math.random() * 30);
+    const createDate = new Date(now);
+    createDate.setDate(createDate.getDate() - daysAgo);
+
+    users.push({
+      id: i + 1,
+      nickname: nicknames[i],
+      createdAt: createDate.toISOString()
+    });
+  }
+
+  return users;
+}
+
 export async function initDatabase(): Promise<void> {
   await db.read();
   
@@ -77,10 +101,16 @@ export async function initDatabase(): Promise<void> {
     db.data.invitations = [];
   }
   
+  if (!db.data.users) {
+    db.data.users = [];
+  }
+  
   if (!db.data.teams || db.data.teams.length === 0) {
+    const mockUsers = generateMockUsers();
+    db.data.users = mockUsers;
     db.data.teams = mockTeams;
     db.data.songs = mockSongs;
-    db.data.votes = generateMockVotes(mockSongs);
+    db.data.votes = generateMockVotes(mockSongs, mockUsers.length);
     db.data.comments = mockComments;
     await db.write();
     console.log('Database initialized with mock data');

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown } from 'lucide-react';
-import { useTeamStore, useFavoriteStore } from '../store/useStore';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User } from 'lucide-react';
+import { useTeamStore, useFavoriteStore, useUserStore } from '../store/useStore';
 import { Song, TeamComment, InvitationWithTeamNames, Team } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import { voteApi, teamApi } from '../services/api';
@@ -32,10 +32,10 @@ export default function TeamDetailPage() {
     rejectInvitation
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const { user, setShowNicknameModal } = useUserStore();
   const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'invitations'>('songs');
   const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
   const [costumeMessage, setCostumeMessage] = useState('');
-  const [commentNickname, setCommentNickname] = useState('');
   const [commentContent, setCommentContent] = useState('');
   const [commentRating, setCommentRating] = useState(0);
   const [commentSubmitMessage, setCommentSubmitMessage] = useState('');
@@ -65,8 +65,12 @@ export default function TeamDetailPage() {
 
   const handleCostumeVote = async (score: number) => {
     if (!selectedTeam) return;
+    if (!user) {
+      setShowNicknameModal(true);
+      return;
+    }
     try {
-      const result = await voteApi.voteCostume(selectedTeam.id, score);
+      const result = await voteApi.voteCostume(selectedTeam.id, score, user.id);
       setCostumeMessage(result.message || '');
       setTimeout(() => setCostumeMessage(''), 3000);
     } catch (error) {
@@ -83,9 +87,8 @@ export default function TeamDetailPage() {
 
   const handleSubmitComment = async () => {
     if (!selectedTeam) return;
-    if (!commentNickname.trim()) {
-      setCommentSubmitMessage('请输入昵称');
-      setTimeout(() => setCommentSubmitMessage(''), 3000);
+    if (!user) {
+      setShowNicknameModal(true);
       return;
     }
     if (!commentContent.trim()) {
@@ -101,7 +104,8 @@ export default function TeamDetailPage() {
 
     const result = await addTeamComment({
       teamId: selectedTeam.id,
-      nickname: commentNickname.trim(),
+      userId: user.id,
+      nickname: user.nickname,
       content: commentContent.trim(),
       rating: commentRating
     });
@@ -110,7 +114,6 @@ export default function TeamDetailPage() {
     setTimeout(() => setCommentSubmitMessage(''), 3000);
 
     if (result.success) {
-      setCommentNickname('');
       setCommentContent('');
       setCommentRating(0);
       setCommentSubmitted(true);
@@ -742,56 +745,59 @@ export default function TeamDetailPage() {
               <div className="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl p-6 mb-8">
                 <h3 className="font-bold text-gray-800 mb-4">发表留言</h3>
                 <div className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">您的昵称</label>
-                      <input
-                        type="text"
-                        value={commentNickname}
-                        onChange={(e) => setCommentNickname(e.target.value)}
-                        placeholder="请输入昵称"
-                        maxLength={20}
-                        disabled={commentSubmitted}
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">打分</label>
-                      <div className="flex items-center space-x-1 py-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
+                        {user ? user.nickname.charAt(0) : '?'}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {user ? user.nickname : '未登录'}
+                        </p>
+                        {!user && (
                           <button
-                            key={star}
-                            type="button"
-                            onClick={() => handleCommentRating(star)}
-                            disabled={commentSubmitted}
-                            className={`${!commentSubmitted ? 'cursor-pointer transition-transform hover:scale-125' : 'cursor-default opacity-75'}`}
+                            onClick={() => setShowNicknameModal(true)}
+                            className="text-sm text-orange-600 hover:text-orange-700"
                           >
-                            <Star
-                              className={`w-8 h-8 transition-all duration-200 ${
-                                star <= commentRating
-                                  ? 'text-yellow-400 fill-current'
-                                  : 'text-gray-300'
-                              }`}
-                            />
+                            点击登录
                           </button>
-                        ))}
-                        {commentRating > 0 && (
-                          <span className="ml-3 text-sm font-medium text-gray-600">
-                            {commentRating} 星
-                          </span>
                         )}
                       </div>
                     </div>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm text-gray-500 mr-2">打分:</span>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => handleCommentRating(star)}
+                          disabled={commentSubmitted || !user}
+                          className={`${!commentSubmitted && user ? 'cursor-pointer transition-transform hover:scale-125' : 'cursor-default opacity-75'}`}
+                        >
+                          <Star
+                            className={`w-8 h-8 transition-all duration-200 ${
+                              star <= commentRating
+                                ? 'text-yellow-400 fill-current'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                      {commentRating > 0 && (
+                        <span className="ml-2 text-sm font-medium text-gray-600">
+                          {commentRating} 星
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">留言内容</label>
                     <textarea
                       value={commentContent}
                       onChange={(e) => setCommentContent(e.target.value)}
-                      placeholder="分享您对这个舞队的看法..."
+                      placeholder={user ? "分享您对这个舞队的看法..." : "请先登录后发表留言"}
                       rows={3}
                       maxLength={500}
-                      disabled={commentSubmitted}
+                      disabled={commentSubmitted || !user}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                     />
                     <p className="text-xs text-gray-400 mt-1 text-right">
@@ -811,7 +817,7 @@ export default function TeamDetailPage() {
                     )}
                     <button
                       onClick={handleSubmitComment}
-                      disabled={commentSubmitted}
+                      disabled={commentSubmitted || !user}
                       className="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-bold hover:from-orange-600 hover:to-red-600 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 ml-auto"
                     >
                       <Send className="w-4 h-4" />
