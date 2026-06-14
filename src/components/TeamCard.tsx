@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Users, Star, Music } from 'lucide-react';
+import { MapPin, Users, Star, Music, Heart } from 'lucide-react';
 import { Team } from '../../shared/types';
+import { useFavoriteStore } from '../store/useStore';
 
 interface TeamCardProps {
   team: Team;
@@ -8,6 +9,15 @@ interface TeamCardProps {
 }
 
 export default function TeamCard({ team, delay = 0 }: TeamCardProps) {
+  const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const favorited = isFavorite(team.id);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(team.id);
+  };
+
   return (
     <Link
       to={`/teams/${team.id}`}
@@ -40,7 +50,17 @@ export default function TeamCard({ team, delay = 0 }: TeamCardProps) {
             </div>
           </div>
         </div>
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center space-x-2">
+          <button
+            onClick={handleFavoriteClick}
+            className={`w-9 h-9 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${
+              favorited
+                ? 'bg-red-500 text-white scale-110'
+                : 'bg-white/90 text-gray-500 hover:bg-white hover:text-red-500 hover:scale-110'
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
+          </button>
           <span className="px-3 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
             {team.style}
           </span>

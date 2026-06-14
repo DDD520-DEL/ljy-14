@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Team, Song, BattlePair, TeamComment, CreateCommentRequest } from '../../shared/types';
 import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi } from '../services/api';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
   district: string;
@@ -242,3 +243,32 @@ export const useMapStore = create<MapState>((set) => ({
     }
   },
 }));
+
+interface FavoriteState {
+  favoriteIds: number[];
+  toggleFavorite: (teamId: number) => void;
+  isFavorite: (teamId: number) => boolean;
+  clearFavorites: () => void;
+}
+
+export const useFavoriteStore = create<FavoriteState>()(
+  persist(
+    (set, get) => ({
+      favoriteIds: [],
+      toggleFavorite: (teamId) => {
+        const { favoriteIds } = get();
+        if (favoriteIds.includes(teamId)) {
+          set({ favoriteIds: favoriteIds.filter((id) => id !== teamId) });
+        } else {
+          set({ favoriteIds: [...favoriteIds, teamId] });
+        }
+      },
+      isFavorite: (teamId) => get().favoriteIds.includes(teamId),
+      clearFavorites: () => set({ favoriteIds: [] }),
+    }),
+    {
+      name: 'team-favorites',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

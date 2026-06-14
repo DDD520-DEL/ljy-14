@@ -6,6 +6,7 @@ import TeamDetailPage from "@/pages/TeamDetailPage";
 import BattlePage from "@/pages/BattlePage";
 import MapPage from "@/pages/MapPage";
 import RankingPage from "@/pages/RankingPage";
+import FavoritesPage from "@/pages/FavoritesPage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/teams" element={<TeamListPage />} />
           <Route path="/teams/:id" element={<TeamDetailPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
           <Route path="/battle" element={<BattlePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/ranking" element={<RankingPage />} />

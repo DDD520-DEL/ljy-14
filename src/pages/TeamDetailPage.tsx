@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send } from 'lucide-react';
-import { useTeamStore } from '../store/useStore';
+import { useTeamStore, useFavoriteStore } from '../store/useStore';
 import { Song, TeamComment } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import { voteApi } from '../services/api';
@@ -21,6 +21,7 @@ export default function TeamDetailPage() {
     addTeamComment,
     clearSelectedTeam 
   } = useTeamStore();
+  const { isFavorite, toggleFavorite } = useFavoriteStore();
   const [activeTab, setActiveTab] = useState<'songs' | 'photos'>('songs');
   const [costumeMessage, setCostumeMessage] = useState('');
   const [commentNickname, setCommentNickname] = useState('');
@@ -156,7 +157,7 @@ export default function TeamDetailPage() {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-8">
-              <div className="flex flex-col md:flex-row md:items-end md:justify-between">
+              <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
                 <div className="flex items-center space-x-6">
                   <img
                     src={selectedTeam.avatar}
@@ -185,6 +186,17 @@ export default function TeamDetailPage() {
                     </div>
                   </div>
                 </div>
+                <button
+                  onClick={() => toggleFavorite(selectedTeam.id)}
+                  className={`flex items-center space-x-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 ${
+                    isFavorite(selectedTeam.id)
+                      ? 'bg-red-500 text-white hover:bg-red-600 scale-105'
+                      : 'bg-white text-red-500 hover:bg-red-50 hover:scale-105'
+                  }`}
+                >
+                  <Heart className={`w-5 h-5 ${isFavorite(selectedTeam.id) ? 'fill-current' : ''}`} />
+                  <span>{isFavorite(selectedTeam.id) ? '已收藏' : '收藏'}</span>
+                </button>
               </div>
             </div>
           </div>

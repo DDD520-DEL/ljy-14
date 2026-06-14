@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, Users, Map, Trophy, Swords, Menu, X } from 'lucide-react';
+import { Music, Users, Map, Trophy, Swords, Menu, X, Heart } from 'lucide-react';
+import { useFavoriteStore } from '../store/useStore';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const { favoriteIds } = useFavoriteStore();
 
   const navLinks = [
     { path: '/', label: '首页', icon: Music },
     { path: '/teams', label: '舞队风采', icon: Users },
+    { path: '/favorites', label: '我的收藏', icon: Heart, badge: favoriteIds.length },
     { path: '/battle', label: '歌单PK', icon: Swords },
     { path: '/map', label: '地图分布', icon: Map },
     { path: '/ranking', label: '排行榜', icon: Trophy },
@@ -32,7 +35,7 @@ export default function Navbar() {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`flex items-center space-x-1 px-4 py-2 rounded-full transition-all duration-300 ${
+                className={`relative flex items-center space-x-1 px-4 py-2 rounded-full transition-all duration-300 ${
                   isActive(link.path)
                     ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg scale-105'
                     : 'text-gray-700 hover:bg-orange-50 hover:text-orange-600'
@@ -40,6 +43,15 @@ export default function Navbar() {
               >
                 <link.icon className="w-4 h-4" />
                 <span className="font-medium">{link.label}</span>
+                {link.badge && link.badge > 0 && (
+                  <span className={`absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold rounded-full px-1 ${
+                    isActive(link.path)
+                      ? 'bg-white text-red-500'
+                      : 'bg-red-500 text-white'
+                  }`}>
+                    {link.badge > 99 ? '99+' : link.badge}
+                  </span>
+                )}
               </Link>
             ))}
           </div>
@@ -60,14 +72,25 @@ export default function Navbar() {
                   key={link.path}
                   to={link.path}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
                     isActive(link.path)
                       ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
                       : 'text-gray-700 hover:bg-orange-50'
                   }`}
                 >
-                  <link.icon className="w-5 h-5" />
-                  <span className="font-medium">{link.label}</span>
+                  <div className="flex items-center space-x-3">
+                    <link.icon className="w-5 h-5" />
+                    <span className="font-medium">{link.label}</span>
+                  </div>
+                  {link.badge && link.badge > 0 && (
+                    <span className={`min-w-[24px] h-6 flex items-center justify-center text-xs font-bold rounded-full px-2 ${
+                      isActive(link.path)
+                        ? 'bg-white/20 text-white'
+                        : 'bg-red-500 text-white'
+                    }`}>
+                      {link.badge > 99 ? '99+' : link.badge}
+                    </span>
+                  )}
                 </Link>
               ))}
             </div>
