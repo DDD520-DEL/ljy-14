@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -22,10 +22,19 @@ interface TeamState {
   commentsError: string | null;
   loading: boolean;
   error: string | null;
+  pendingInvitations: InvitationWithTeamNames[];
+  completedInvitations: InvitationWithTeamNames[];
+  invitationsLoading: boolean;
+  invitationsError: string | null;
   fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string }) => Promise<void>;
   fetchTeamById: (id: number) => Promise<void>;
   fetchTeamSongs: (teamId: number) => Promise<void>;
   fetchTeamComments: (teamId: number) => Promise<void>;
+  fetchPendingInvitations: (teamId: number) => Promise<void>;
+  fetchCompletedInvitations: (teamId: number) => Promise<void>;
+  createInvitation: (data: CreateInvitationRequest) => Promise<{ success: boolean; message?: string }>;
+  acceptInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
+  rejectInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
   addTeamComment: (data: CreateCommentRequest) => Promise<{ success: boolean; message?: string }>;
   clearSelectedTeam: () => void;
 }
@@ -86,6 +95,10 @@ export const useTeamStore = create<TeamState>((set) => ({
   commentsError: null,
   loading: false,
   error: null,
+  pendingInvitations: [],
+  completedInvitations: [],
+  invitationsLoading: false,
+  invitationsError: null,
   
   fetchTeams: async (filters) => {
     set({ loading: true, error: null });
@@ -140,8 +153,92 @@ export const useTeamStore = create<TeamState>((set) => ({
       return { success: false, message: '发布留言失败' };
     }
   },
+
+  fetchPendingInvitations: async (teamId) => {
+    set({ invitationsLoading: true, invitationsError: null });
+    try {
+      const invitations = await invitationApi.getPendingInvitations(teamId);
+      set({ pendingInvitations: invitations, invitationsLoading: false });
+    } catch (error) {
+      set({ invitationsError: '获取待处理约舞失败', invitationsLoading: false });
+    }
+  },
+
+  fetchCompletedInvitations: async (teamId) => {
+    set({ invitationsLoading: true, invitationsError: null });
+    try {
+      const invitations = await invitationApi.getCompletedInvitations(teamId);
+      set({ completedInvitations: invitations, invitationsLoading: false });
+    } catch (error) {
+      set({ invitationsError: '获取已完成约舞失败', invitationsLoading: false });
+    }
+  },
+
+  createInvitation: async (data) => {
+    try {
+      const result = await invitationApi.createInvitation(data);
+      if (result.success && result.invitation) {
+        set((state) => ({
+          pendingInvitations: [...state.pendingInvitations, {
+            ...result.invitation!,
+            fromTeamName: state.teams.find(t => t.id === data.fromTeamId)?.name || '',
+            toTeamName: state.teams.find(t => t.id === data.toTeamId)?.name || ''
+          }]
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '发送约舞邀请失败' };
+    }
+  },
+
+  acceptInvitation: async (invitationId, teamId) => {
+    try {
+      const result = await invitationApi.acceptInvitation(invitationId);
+      if (result.success) {
+        set((state) => {
+          const updatedInvitation = result.invitation!;
+          const pendingIdx = state.pendingInvitations.findIndex(i => i.id === invitationId);
+          const newPending = pendingIdx !== -1 
+            ? [...state.pendingInvitations.slice(0, pendingIdx), ...state.pendingInvitations.slice(pendingIdx + 1)]
+            : state.pendingInvitations;
+          const newCompleted = [{ ...updatedInvitation,
+            fromTeamName: state.pendingInvitations.find(i => i.id === invitationId)?.fromTeamName || '',
+            toTeamName: state.pendingInvitations.find(i => i.id === invitationId)?.toTeamName || ''
+          }, ...state.completedInvitations];
+          return { pendingInvitations: newPending, completedInvitations: newCompleted };
+        });
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '接受邀请失败' };
+    }
+  },
+
+  rejectInvitation: async (invitationId, teamId) => {
+    try {
+      const result = await invitationApi.rejectInvitation(invitationId);
+      if (result.success) {
+        set((state) => {
+          const updatedInvitation = result.invitation!;
+          const pendingIdx = state.pendingInvitations.findIndex(i => i.id === invitationId);
+          const newPending = pendingIdx !== -1 
+            ? [...state.pendingInvitations.slice(0, pendingIdx), ...state.pendingInvitations.slice(pendingIdx + 1)]
+            : state.pendingInvitations;
+          const newCompleted = [{ ...updatedInvitation,
+            fromTeamName: state.pendingInvitations.find(i => i.id === invitationId)?.fromTeamName || '',
+            toTeamName: state.pendingInvitations.find(i => i.id === invitationId)?.toTeamName || ''
+          }, ...state.completedInvitations];
+          return { pendingInvitations: newPending, completedInvitations: newCompleted };
+        });
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '拒绝邀请失败' };
+    }
+  },
   
-  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [] }),
+  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [], pendingInvitations: [], completedInvitations: [] }),
 }));
 
 export const useRankingStore = create<RankingState>((set, get) => ({

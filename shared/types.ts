@@ -88,3 +88,38 @@ export interface CreateCommentResponse {
   comment?: TeamComment;
   message?: string;
 }
+
+export type InvitationStatus = 'pending' | 'accepted' | 'rejected';
+
+export interface DanceInvitation {
+  id: number;
+  fromTeamId: number;
+  toTeamId: number;
+  fromTeamName?: string;
+  toTeamName?: string;
+  danceTime: string;
+  location: string;
+  remark: string;
+  status: InvitationStatus;
+  createdAt: string;
+  respondedAt?: string;
+}
+
+export interface CreateInvitationRequest {
+  fromTeamId: number;
+  toTeamId: number;
+  danceTime: string;
+  location: string;
+  remark: string;
+}
+
+export interface InvitationResponse {
+  success: boolean;
+  invitation?: DanceInvitation;
+  message?: string;
+}
+
+export interface InvitationWithTeamNames extends DanceInvitation {
+  fromTeamName: string;
+  toTeamName: string;
+}

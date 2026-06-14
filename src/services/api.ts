@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -102,4 +102,33 @@ export const commentApi = {
   }),
   
   getTeamRating: (teamId: number) => request<{ avgRating: number; totalComments: number }>(`/teams/${teamId}/comments/rating`),
+};
+
+export const invitationApi = {
+  getTeamInvitations: (teamId: number, type?: 'sent' | 'received' | 'pending' | 'completed') => {
+    const params = type ? `?type=${type}` : '';
+    return request<InvitationWithTeamNames[]>(`/invitations/team/${teamId}${params}`);
+  },
+
+  getPendingInvitations: (teamId: number) =>
+    request<InvitationWithTeamNames[]>(`/invitations/team/${teamId}?type=pending`),
+
+  getCompletedInvitations: (teamId: number) =>
+    request<InvitationWithTeamNames[]>(`/invitations/team/${teamId}?type=completed`),
+
+  createInvitation: (data: CreateInvitationRequest) =>
+    request<InvitationResponse>('/invitations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  acceptInvitation: (id: number) =>
+    request<InvitationResponse>(`/invitations/${id}/accept`, {
+      method: 'PUT',
+    }),
+
+  rejectInvitation: (id: number) =>
+    request<InvitationResponse>(`/invitations/${id}/reject`, {
+      method: 'PUT',
+    }),
 };

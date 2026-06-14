@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown } from 'lucide-react';
 import { useTeamStore, useFavoriteStore } from '../store/useStore';
-import { Song, TeamComment } from '../../shared/types';
+import { Song, TeamComment, InvitationWithTeamNames, Team } from '../../shared/types';
 import StarRating from '../components/StarRating';
-import { voteApi } from '../services/api';
+import { voteApi, teamApi } from '../services/api';
 
 export default function TeamDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -19,22 +19,46 @@ export default function TeamDetailPage() {
     fetchTeamSongs, 
     fetchTeamComments,
     addTeamComment,
-    clearSelectedTeam 
+    clearSelectedTeam,
+    teams,
+    fetchTeams,
+    pendingInvitations,
+    completedInvitations,
+    invitationsLoading,
+    fetchPendingInvitations,
+    fetchCompletedInvitations,
+    createInvitation,
+    acceptInvitation,
+    rejectInvitation
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
-  const [activeTab, setActiveTab] = useState<'songs' | 'photos'>('songs');
+  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'invitations'>('songs');
+  const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
   const [costumeMessage, setCostumeMessage] = useState('');
   const [commentNickname, setCommentNickname] = useState('');
   const [commentContent, setCommentContent] = useState('');
   const [commentRating, setCommentRating] = useState(0);
   const [commentSubmitMessage, setCommentSubmitMessage] = useState('');
   const [commentSubmitted, setCommentSubmitted] = useState(false);
+  
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteFromTeamId, setInviteFromTeamId] = useState<number | ''>('');
+  const [inviteDanceTime, setInviteDanceTime] = useState('');
+  const [inviteLocation, setInviteLocation] = useState('');
+  const [inviteRemark, setInviteRemark] = useState('');
+  const [inviteSubmitMessage, setInviteSubmitMessage] = useState('');
+  const [showFromTeamDropdown, setShowFromTeamDropdown] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchTeamById(parseInt(id));
       fetchTeamSongs(parseInt(id));
       fetchTeamComments(parseInt(id));
+      fetchPendingInvitations(parseInt(id));
+      fetchCompletedInvitations(parseInt(id));
+    }
+    if (teams.length === 0) {
+      fetchTeams();
     }
     return () => clearSelectedTeam();
   }, [id]);
@@ -91,6 +115,75 @@ export default function TeamDetailPage() {
       setCommentRating(0);
       setCommentSubmitted(true);
     }
+  };
+
+  const handleOpenInviteModal = () => {
+    setShowInviteModal(true);
+    setInviteFromTeamId('');
+    setInviteDanceTime('');
+    setInviteLocation(selectedTeam?.parkName || '');
+    setInviteRemark('');
+    setInviteSubmitMessage('');
+  };
+
+  const handleCloseInviteModal = () => {
+    setShowInviteModal(false);
+    setShowFromTeamDropdown(false);
+  };
+
+  const handleSubmitInvitation = async () => {
+    if (!selectedTeam) return;
+    if (inviteFromTeamId === '') {
+      setInviteSubmitMessage('请选择发起约舞的舞队');
+      setTimeout(() => setInviteSubmitMessage(''), 3000);
+      return;
+    }
+    if (!inviteDanceTime) {
+      setInviteSubmitMessage('请选择约舞时间');
+      setTimeout(() => setInviteSubmitMessage(''), 3000);
+      return;
+    }
+    if (!inviteLocation.trim()) {
+      setInviteSubmitMessage('请填写约舞地点');
+      setTimeout(() => setInviteSubmitMessage(''), 3000);
+      return;
+    }
+
+    const result = await createInvitation({
+      fromTeamId: inviteFromTeamId as number,
+      toTeamId: selectedTeam.id,
+      danceTime: inviteDanceTime,
+      location: inviteLocation.trim(),
+      remark: inviteRemark.trim()
+    });
+
+    setInviteSubmitMessage(result.message || '');
+    setTimeout(() => setInviteSubmitMessage(''), 3000);
+
+    if (result.success) {
+      setTimeout(() => handleCloseInviteModal(), 1000);
+    }
+  };
+
+  const handleAcceptInvitation = async (invitationId: number) => {
+    if (!selectedTeam) return;
+    await acceptInvitation(invitationId, selectedTeam.id);
+  };
+
+  const handleRejectInvitation = async (invitationId: number) => {
+    if (!selectedTeam) return;
+    await rejectInvitation(invitationId, selectedTeam.id);
+  };
+
+  const formatDateTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -186,17 +279,26 @@ export default function TeamDetailPage() {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => toggleFavorite(selectedTeam.id)}
-                  className={`flex items-center space-x-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 ${
-                    isFavorite(selectedTeam.id)
-                      ? 'bg-red-500 text-white hover:bg-red-600 scale-105'
-                      : 'bg-white text-red-500 hover:bg-red-50 hover:scale-105'
-                  }`}
-                >
-                  <Heart className={`w-5 h-5 ${isFavorite(selectedTeam.id) ? 'fill-current' : ''}`} />
-                  <span>{isFavorite(selectedTeam.id) ? '已收藏' : '收藏'}</span>
-                </button>
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={handleOpenInviteModal}
+                    className="flex items-center space-x-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600 hover:scale-105"
+                  >
+                    <Handshake className="w-5 h-5" />
+                    <span>发起约舞</span>
+                  </button>
+                  <button
+                    onClick={() => toggleFavorite(selectedTeam.id)}
+                    className={`flex items-center space-x-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 ${
+                      isFavorite(selectedTeam.id)
+                        ? 'bg-red-500 text-white hover:bg-red-600 scale-105'
+                        : 'bg-white text-red-500 hover:bg-red-50 hover:scale-105'
+                    }`}
+                  >
+                    <Heart className={`w-5 h-5 ${isFavorite(selectedTeam.id) ? 'fill-current' : ''}`} />
+                    <span>{isFavorite(selectedTeam.id) ? '已收藏' : '收藏'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -294,7 +396,7 @@ export default function TeamDetailPage() {
             </div>
 
             <div className="border-t border-gray-100 pt-6">
-              <div className="flex space-x-4 mb-6">
+              <div className="flex flex-wrap gap-4 mb-6">
                 <button
                   onClick={() => setActiveTab('songs')}
                   className={`px-6 py-3 rounded-xl font-bold transition-all ${
@@ -319,6 +421,24 @@ export default function TeamDetailPage() {
                   <span className="flex items-center space-x-2">
                     <Camera className="w-5 h-5" />
                     <span>风采展示</span>
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('invitations')}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                    activeTab === 'invitations'
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="flex items-center space-x-2">
+                    <Handshake className="w-5 h-5" />
+                    <span>约舞记录 ({pendingInvitations.length + completedInvitations.length})</span>
+                    {pendingInvitations.length > 0 && (
+                      <span className="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                        {pendingInvitations.length}
+                      </span>
+                    )}
                   </span>
                 </button>
               </div>
@@ -395,6 +515,215 @@ export default function TeamDetailPage() {
                       <p className="font-bold text-lg">👗 服装展示</p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'invitations' && (
+                <div className="space-y-6">
+                  <div className="flex space-x-4 mb-4">
+                    <button
+                      onClick={() => setInvitationTab('pending')}
+                      className={`px-5 py-2 rounded-lg font-medium transition-all ${
+                        invitationTab === 'pending'
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <span className="flex items-center space-x-2">
+                        <Clock className="w-4 h-4" />
+                        <span>待处理 ({pendingInvitations.filter(inv => inv.toTeamId === selectedTeam?.id || inv.fromTeamId === selectedTeam?.id).length})</span>
+                        {pendingInvitations.length > 0 && (
+                          <span className="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
+                            {pendingInvitations.length}
+                          </span>
+                        )}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => setInvitationTab('completed')}
+                      className={`px-5 py-2 rounded-lg font-medium transition-all ${
+                        invitationTab === 'completed'
+                          ? 'bg-green-500 text-white shadow-md'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      <span className="flex items-center space-x-2">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>已完成 ({completedInvitations.length})</span>
+                      </span>
+                    </button>
+                  </div>
+
+                  {(() => {
+                    if (invitationsLoading) {
+                      return (
+                        <div className="text-center py-12">
+                          <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mx-auto"></div>
+                          <p className="text-gray-500 mt-4">加载约舞记录中...</p>
+                        </div>
+                      );
+                    }
+                    if (invitationTab === 'pending') {
+                      if (pendingInvitations.length > 0) {
+                        return (
+                          <div className="space-y-4">
+                            {pendingInvitations.map((inv: InvitationWithTeamNames, index: number) => {
+                              const isReceived = inv.toTeamId === selectedTeam?.id;
+                              return (
+                                <div
+                                  key={inv.id}
+                                  className={`rounded-xl p-5 border-2 transition-all animate-fadeInUp ${
+                                    isReceived
+                                      ? 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200'
+                                      : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'
+                                  }`}
+                                  style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                        isReceived ? 'bg-blue-500 text-white' : 'bg-purple-500 text-white'
+                                      }`}>
+                                        {isReceived ? '收到邀请' : '发出邀请'}
+                                      </span>
+                                      <span className="px-3 py-1 bg-yellow-400 rounded-full text-xs font-bold text-yellow-900">
+                                        待处理
+                                      </span>
+                                    </div>
+                                    <span className="text-xs text-gray-500">
+                                      发起时间: {formatDateTime(inv.createdAt)}
+                                    </span>
+                                  </div>
+                                  <div className="mb-4">
+                                    <div className="flex items-center space-x-2 text-lg font-bold text-gray-800 mb-2">
+                                      <span>{inv.fromTeamName}</span>
+                                      <span className="text-2xl">🤝</span>
+                                      <span>{inv.toTeamName}</span>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-3 text-sm">
+                                      <div className="flex items-center space-x-2 text-gray-600">
+                                        <Calendar className="w-4 h-4 text-blue-500" />
+                                        <span><span className="font-medium">约舞时间:</span> {formatDateTime(inv.danceTime)}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-gray-600">
+                                        <MapPin className="w-4 h-4 text-red-500" />
+                                        <span><span className="font-medium">约舞地点:</span> {inv.location}</span>
+                                      </div>
+                                    </div>
+                                    {inv.remark && (
+                                      <div className="mt-3 p-3 bg-white rounded-lg text-sm text-gray-600">
+                                        <span className="font-medium">备注:</span> {inv.remark}
+                                      </div>
+                                    )}
+                                  </div>
+                                  {isReceived && (
+                                    <div className="flex justify-end space-x-3">
+                                      <button
+                                        onClick={() => handleRejectInvitation(inv.id)}
+                                        className="flex items-center space-x-1 px-5 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-all"
+                                      >
+                                        <XCircle className="w-4 h-4" />
+                                        <span>拒绝</span>
+                                      </button>
+                                      <button
+                                        onClick={() => handleAcceptInvitation(inv.id)}
+                                        className="flex items-center space-x-1 px-5 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-all"
+                                      >
+                                        <CheckCircle className="w-4 h-4" />
+                                        <span>接受</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                  {!isReceived && (
+                                    <div className="flex justify-end">
+                                      <span className="text-sm text-gray-500 italic">等待对方舞队回应...</span>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="text-center py-12 text-gray-500">
+                            <Handshake className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                            <p>暂无待处理的约舞邀请</p>
+                          </div>
+                        );
+                      }
+                    } else {
+                      if (completedInvitations.length > 0) {
+                        return (
+                          <div className="space-y-4">
+                            {completedInvitations.map((inv: InvitationWithTeamNames, index: number) => {
+                              const isReceived = inv.toTeamId === selectedTeam?.id;
+                              return (
+                                <div
+                                  key={inv.id}
+                                  className={`rounded-xl p-5 border transition-all animate-fadeInUp ${
+                                    inv.status === 'accepted'
+                                      ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
+                                      : 'bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200'
+                                  }`}
+                                  style={{ animationDelay: `${index * 50}ms` }}
+                                >
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center space-x-2">
+                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                        isReceived ? 'bg-blue-400 text-white' : 'bg-purple-400 text-white'
+                                      }`}>
+                                        {isReceived ? '收到邀请' : '发出邀请'}
+                                      </span>
+                                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                        inv.status === 'accepted' ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'
+                                      }`}>
+                                        {inv.status === 'accepted' ? '已接受' : '已拒绝'}
+                                      </span>
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {inv.respondedAt && (
+                                        <span>处理时间: {formatDateTime(inv.respondedAt)}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="mb-2">
+                                    <div className="flex items-center space-x-2 text-lg font-bold text-gray-800 mb-2">
+                                      <span>{inv.fromTeamName}</span>
+                                      <span className="text-2xl">🤝</span>
+                                      <span>{inv.toTeamName}</span>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-3 text-sm">
+                                      <div className="flex items-center space-x-2 text-gray-600">
+                                        <Calendar className="w-4 h-4 text-blue-500" />
+                                        <span><span className="font-medium">约舞时间:</span> {formatDateTime(inv.danceTime)}</span>
+                                      </div>
+                                      <div className="flex items-center space-x-2 text-gray-600">
+                                        <MapPin className="w-4 h-4 text-red-500" />
+                                        <span><span className="font-medium">约舞地点:</span> {inv.location}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {inv.remark && (
+                                    <div className="mt-3 p-3 bg-white rounded-lg text-sm text-gray-600">
+                                      <span className="font-medium">备注:</span> {inv.remark}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="text-center py-12 text-gray-500">
+                            <CheckCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                            <p>暂无已完成的约舞记录</p>
+                          </div>
+                        );
+                      }
+                    }
+                  })()}
                 </div>
               )}
             </div>
@@ -544,6 +873,146 @@ export default function TeamDetailPage() {
           </div>
         </div>
       </div>
+
+      {showInviteModal && selectedTeam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={handleCloseInviteModal}>
+          <div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fadeInUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center">
+                    <Handshake className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                      发起约舞邀请
+                    </h2>
+                    <p className="text-sm text-gray-500">向 {selectedTeam.name}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseInviteModal}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 选择发起约舞的舞队
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowFromTeamDropdown(!showFromTeamDropdown)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all text-left flex items-center justify-between bg-white"
+                    >
+                      <span className={inviteFromTeamId === '' ? 'text-gray-400' : 'text-gray-800'}>
+                        {inviteFromTeamId === ''
+                          ? '请选择您的舞队'
+                          : teams.find(t => t.id === inviteFromTeamId)?.name}
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showFromTeamDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    {showFromTeamDropdown && (
+                      <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                        {teams
+                          .filter(t => t.id !== selectedTeam.id)
+                          .map(t => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setInviteFromTeamId(t.id);
+                                setShowFromTeamDropdown(false);
+                              }}
+                              className={`w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors ${
+                                inviteFromTeamId === t.id ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                              }`}
+                            >
+                              {t.name}
+                            </button>
+                          ))}
+                        {teams.filter(t => t.id !== selectedTeam.id).length === 0 && (
+                            <div className="px-4 py-3 text-gray-400">暂无其他舞队</div>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 约舞时间
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={inviteDanceTime}
+                    onChange={(e) => setInviteDanceTime(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 约舞地点
+                  </label>
+                  <input
+                    type="text"
+                    value={inviteLocation}
+                    onChange={(e) => setInviteLocation(e.target.value)}
+                    placeholder="请输入约舞地点"
+                    maxLength={100}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">备注（选填）</label>
+                  <textarea
+                    value={inviteRemark}
+                    onChange={(e) => setInviteRemark(e.target.value)}
+                    placeholder="可以输入想跳舞的类型、注意事项等"
+                    rows={3}
+                    maxLength={300}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
+                  />
+                  <p className="text-xs text-gray-400 mt-1 text-right">
+                    {inviteRemark.length}/300
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-between">
+                {inviteSubmitMessage && (
+                  <p className={`text-sm ${inviteSubmitMessage.includes('成功') ? 'text-green-500' : 'text-red-500'}`}>
+                    {inviteSubmitMessage}
+                  </p>
+                )}
+                <div className="flex space-x-3 ml-auto">
+                  <button
+                    onClick={handleCloseInviteModal}
+                    className="px-6 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={handleSubmitInvitation}
+                    className="flex items-center space-x-2 px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>发送邀请</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
