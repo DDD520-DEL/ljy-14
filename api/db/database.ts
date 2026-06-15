@@ -1,6 +1,6 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost } from '../../shared/types.js';
+import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost, BattleRecord } from '../../shared/types.js';
 import { mockTeams, mockSongs, mockComments, mockPosts } from './mockData.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,6 +22,7 @@ export interface DatabaseSchema {
   invitations: DanceInvitation[];
   users: User[];
   posts: TeamPost[];
+  battleRecords: BattleRecord[];
 }
 
 const file = path.join(dataDir, 'db.json');
@@ -34,7 +35,8 @@ const defaultData: DatabaseSchema = {
   comments: [],
   invitations: [],
   users: [],
-  posts: []
+  posts: [],
+  battleRecords: []
 };
 
 export const db = new Low<DatabaseSchema>(adapter, defaultData);
@@ -122,6 +124,10 @@ export async function initDatabase(): Promise<void> {
     db.data.posts = [];
   }
   
+  if (!db.data.battleRecords) {
+    db.data.battleRecords = [];
+  }
+  
   if (!db.data.teams || db.data.teams.length === 0) {
     const mockUsers = generateMockUsers();
     db.data.users = mockUsers;
@@ -130,8 +136,25 @@ export async function initDatabase(): Promise<void> {
     db.data.votes = generateMockVotes(mockSongs, mockUsers.length);
     db.data.comments = mockComments;
     db.data.posts = mockPosts;
+    db.data.battleRecords = [];
     await db.write();
     console.log('Database initialized with mock data');
+  } else {
+    let needsUpdate = false;
+    db.data.songs.forEach(song => {
+      if (song.battleCount === undefined) {
+        song.battleCount = 0;
+        needsUpdate = true;
+      }
+      if (song.battleWins === undefined) {
+        song.battleWins = 0;
+        needsUpdate = true;
+      }
+    });
+    if (needsUpdate) {
+      await db.write();
+      console.log('Database migrated: added battle fields to songs');
+    }
   }
 }
 

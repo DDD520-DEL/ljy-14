@@ -28,12 +28,14 @@ interface TeamState {
   completedInvitations: InvitationWithTeamNames[];
   invitationsLoading: boolean;
   invitationsError: string | null;
+  teamBattleStats: { totalBattles: number; totalWins: number; totalLosses: number; winRate: number } | null;
   fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string; hasVideo?: boolean }) => Promise<void>;
   fetchTeamById: (id: number) => Promise<void>;
   fetchTeamSongs: (teamId: number) => Promise<void>;
   fetchTeamComments: (teamId: number) => Promise<void>;
   fetchPendingInvitations: (teamId: number) => Promise<void>;
   fetchCompletedInvitations: (teamId: number) => Promise<void>;
+  fetchTeamBattleStats: (teamId: number) => Promise<void>;
   createInvitation: (data: CreateInvitationRequest) => Promise<{ success: boolean; message?: string }>;
   acceptInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
   rejectInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
@@ -69,6 +71,7 @@ interface BattleState {
   battlePair: BattlePair | null;
   fetchBattlePair: () => Promise<void>;
   voteAddict: (songId: number, score: number, userId: number) => Promise<{ success: boolean; message?: string }>;
+  recordBattleResult: (winnerSongId: number, loserSongId: number) => Promise<{ success: boolean; message?: string }>;
 }
 
 interface MapState {
@@ -115,6 +118,7 @@ export const useTeamStore = create<TeamState>((set) => ({
   completedInvitations: [],
   invitationsLoading: false,
   invitationsError: null,
+  teamBattleStats: null,
   
   fetchTeams: async (filters) => {
     set({ loading: true, error: null });
@@ -190,6 +194,15 @@ export const useTeamStore = create<TeamState>((set) => ({
     }
   },
 
+  fetchTeamBattleStats: async (teamId) => {
+    try {
+      const stats = await battleApi.getTeamStats(teamId);
+      set({ teamBattleStats: stats });
+    } catch (error) {
+      console.error('获取舞队PK统计失败', error);
+    }
+  },
+
   createInvitation: async (data) => {
     try {
       const result = await invitationApi.createInvitation(data);
@@ -254,7 +267,7 @@ export const useTeamStore = create<TeamState>((set) => ({
     }
   },
   
-  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [], pendingInvitations: [], completedInvitations: [] }),
+  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [], pendingInvitations: [], completedInvitations: [], teamBattleStats: null }),
 }));
 
 export const useRankingStore = create<RankingState>((set, get) => ({
@@ -325,7 +338,7 @@ export const useRankingStore = create<RankingState>((set, get) => ({
   },
 }));
 
-export const useBattleStore = create<BattleState>((set) => ({
+export const useBattleStore = create<BattleState>((set, get) => ({
   battlePair: null,
   
   fetchBattlePair: async () => {
@@ -355,6 +368,43 @@ export const useBattleStore = create<BattleState>((set) => ({
       return { success: result.success, message: result.message };
     } catch (error) {
       return { success: false, message: '投票失败' };
+    }
+  },
+
+  recordBattleResult: async (winnerSongId, loserSongId) => {
+    try {
+      const result = await battleApi.recordResult({ winnerSongId, loserSongId });
+      if (result.success) {
+        set((state) => {
+          if (!state.battlePair) return state;
+          const updatedPair = { ...state.battlePair };
+          if (updatedPair.song1.id === winnerSongId) {
+            updatedPair.song1 = { 
+              ...updatedPair.song1, 
+              battleCount: updatedPair.song1.battleCount + 1,
+              battleWins: updatedPair.song1.battleWins + 1
+            };
+            updatedPair.song2 = { 
+              ...updatedPair.song2, 
+              battleCount: updatedPair.song2.battleCount + 1
+            };
+          } else if (updatedPair.song2.id === winnerSongId) {
+            updatedPair.song2 = { 
+              ...updatedPair.song2, 
+              battleCount: updatedPair.song2.battleCount + 1,
+              battleWins: updatedPair.song2.battleWins + 1
+            };
+            updatedPair.song1 = { 
+              ...updatedPair.song1, 
+              battleCount: updatedPair.song1.battleCount + 1
+            };
+          }
+          return { battlePair: updatedPair };
+        });
+      }
+      return { success: result.success, message: result.success ? 'PK结果已记录' : '记录失败' };
+    } catch (error) {
+      return { success: false, message: '记录PK结果失败' };
     }
   },
 }));

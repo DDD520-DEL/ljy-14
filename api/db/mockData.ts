@@ -251,53 +251,53 @@ export const mockTeams: Team[] = [
 ];
 
 export const mockSongs: Song[] = [
-  { id: 1, teamId: 1, title: '最炫民族风', artist: '凤凰传奇', genre: '流行', duration: '4:15', coverUrl: 'https://picsum.photos/seed/song1/300/300', addictScore: 4.8, addictVotes: 256, createdAt: '2024-01-15T10:30:00Z' },
-  { id: 2, teamId: 1, title: '小苹果', artist: '筷子兄弟', genre: '流行', duration: '3:30', coverUrl: 'https://picsum.photos/seed/song2/300/300', addictScore: 4.6, addictVotes: 198, createdAt: '2024-01-15T10:30:00Z' },
-  { id: 3, teamId: 1, title: '套马杆', artist: '乌兰托娅', genre: '民族', duration: '4:02', coverUrl: 'https://picsum.photos/seed/song3/300/300', addictScore: 4.5, addictVotes: 176, createdAt: '2024-01-15T10:30:00Z' },
-  { id: 4, teamId: 1, title: '荷塘月色', artist: '凤凰传奇', genre: '流行', duration: '4:05', coverUrl: 'https://picsum.photos/seed/song4/300/300', addictScore: 4.3, addictVotes: 145, createdAt: '2024-01-15T10:30:00Z' },
+  { id: 1, teamId: 1, title: '最炫民族风', artist: '凤凰传奇', genre: '流行', duration: '4:15', coverUrl: 'https://picsum.photos/seed/song1/300/300', addictScore: 4.8, addictVotes: 256, battleCount: 0, battleWins: 0, createdAt: '2024-01-15T10:30:00Z' },
+  { id: 2, teamId: 1, title: '小苹果', artist: '筷子兄弟', genre: '流行', duration: '3:30', coverUrl: 'https://picsum.photos/seed/song2/300/300', addictScore: 4.6, addictVotes: 198, battleCount: 0, battleWins: 0, createdAt: '2024-01-15T10:30:00Z' },
+  { id: 3, teamId: 1, title: '套马杆', artist: '乌兰托娅', genre: '民族', duration: '4:02', coverUrl: 'https://picsum.photos/seed/song3/300/300', addictScore: 4.5, addictVotes: 176, battleCount: 0, battleWins: 0, createdAt: '2024-01-15T10:30:00Z' },
+  { id: 4, teamId: 1, title: '荷塘月色', artist: '凤凰传奇', genre: '流行', duration: '4:05', coverUrl: 'https://picsum.photos/seed/song4/300/300', addictScore: 4.3, addictVotes: 145, battleCount: 0, battleWins: 0, createdAt: '2024-01-15T10:30:00Z' },
   
-  { id: 5, teamId: 2, title: '酒醉的蝴蝶', artist: '崔伟立', genre: '流行', duration: '3:28', coverUrl: 'https://picsum.photos/seed/song5/300/300', addictScore: 4.7, addictVotes: 234, createdAt: '2024-02-10T08:20:00Z' },
-  { id: 6, teamId: 2, title: '野花香', artist: '莫斯满', genre: '流行', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song6/300/300', addictScore: 4.4, addictVotes: 167, createdAt: '2024-02-10T08:20:00Z' },
-  { id: 7, teamId: 2, title: '天边的情哥哥', artist: '郭玲', genre: '流行', duration: '3:52', coverUrl: 'https://picsum.photos/seed/song7/300/300', addictScore: 4.2, addictVotes: 123, createdAt: '2024-02-10T08:20:00Z' },
+  { id: 5, teamId: 2, title: '酒醉的蝴蝶', artist: '崔伟立', genre: '流行', duration: '3:28', coverUrl: 'https://picsum.photos/seed/song5/300/300', addictScore: 4.7, addictVotes: 234, battleCount: 0, battleWins: 0, createdAt: '2024-02-10T08:20:00Z' },
+  { id: 6, teamId: 2, title: '野花香', artist: '莫斯满', genre: '流行', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song6/300/300', addictScore: 4.4, addictVotes: 167, battleCount: 0, battleWins: 0, createdAt: '2024-02-10T08:20:00Z' },
+  { id: 7, teamId: 2, title: '天边的情哥哥', artist: '郭玲', genre: '流行', duration: '3:52', coverUrl: 'https://picsum.photos/seed/song7/300/300', addictScore: 4.2, addictVotes: 123, battleCount: 0, battleWins: 0, createdAt: '2024-02-10T08:20:00Z' },
   
-  { id: 8, teamId: 3, title: '茉莉花', artist: '中国民歌', genre: '古典', duration: '4:20', coverUrl: 'https://picsum.photos/seed/song8/300/300', addictScore: 4.9, addictVotes: 289, createdAt: '2024-01-20T14:45:00Z' },
-  { id: 9, teamId: 3, title: '春江花月夜', artist: '纯音乐', genre: '古典', duration: '5:10', coverUrl: 'https://picsum.photos/seed/song9/300/300', addictScore: 4.7, addictVotes: 201, createdAt: '2024-01-20T14:45:00Z' },
-  { id: 10, teamId: 3, title: '梁祝', artist: '纯音乐', genre: '古典', duration: '4:35', coverUrl: 'https://picsum.photos/seed/song10/300/300', addictScore: 4.6, addictVotes: 189, createdAt: '2024-01-20T14:45:00Z' },
+  { id: 8, teamId: 3, title: '茉莉花', artist: '中国民歌', genre: '古典', duration: '4:20', coverUrl: 'https://picsum.photos/seed/song8/300/300', addictScore: 4.9, addictVotes: 289, battleCount: 0, battleWins: 0, createdAt: '2024-01-20T14:45:00Z' },
+  { id: 9, teamId: 3, title: '春江花月夜', artist: '纯音乐', genre: '古典', duration: '5:10', coverUrl: 'https://picsum.photos/seed/song9/300/300', addictScore: 4.7, addictVotes: 201, battleCount: 0, battleWins: 0, createdAt: '2024-01-20T14:45:00Z' },
+  { id: 10, teamId: 3, title: '梁祝', artist: '纯音乐', genre: '古典', duration: '4:35', coverUrl: 'https://picsum.photos/seed/song10/300/300', addictScore: 4.6, addictVotes: 189, battleCount: 0, battleWins: 0, createdAt: '2024-01-20T14:45:00Z' },
   
-  { id: 11, teamId: 4, title: '卡路里', artist: '火箭少女101', genre: '健身操', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song11/300/300', addictScore: 4.5, addictVotes: 178, createdAt: '2024-03-05T09:15:00Z' },
-  { id: 12, teamId: 4, title: '站在草原望北京', artist: '乌兰图雅', genre: '健身操', duration: '4:12', coverUrl: 'https://picsum.photos/seed/song12/300/300', addictScore: 4.3, addictVotes: 145, createdAt: '2024-03-05T09:15:00Z' },
-  { id: 13, teamId: 4, title: '美美哒', artist: '门丽', genre: '健身操', duration: '3:42', coverUrl: 'https://picsum.photos/seed/song13/300/300', addictScore: 4.1, addictVotes: 112, createdAt: '2024-03-05T09:15:00Z' },
-  { id: 14, teamId: 4, title: '动起来', artist: '郭富城', genre: '健身操', duration: '3:38', coverUrl: 'https://picsum.photos/seed/song14/300/300', addictScore: 4.0, addictVotes: 98, createdAt: '2024-03-05T09:15:00Z' },
-  { id: 15, teamId: 4, title: '快乐崇拜', artist: '潘玮柏/张韶涵', genre: '健身操', duration: '4:05', coverUrl: 'https://picsum.photos/seed/song15/300/300', addictScore: 4.2, addictVotes: 134, createdAt: '2024-03-05T09:15:00Z' },
+  { id: 11, teamId: 4, title: '卡路里', artist: '火箭少女101', genre: '健身操', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song11/300/300', addictScore: 4.5, addictVotes: 178, battleCount: 0, battleWins: 0, createdAt: '2024-03-05T09:15:00Z' },
+  { id: 12, teamId: 4, title: '站在草原望北京', artist: '乌兰图雅', genre: '健身操', duration: '4:12', coverUrl: 'https://picsum.photos/seed/song12/300/300', addictScore: 4.3, addictVotes: 145, battleCount: 0, battleWins: 0, createdAt: '2024-03-05T09:15:00Z' },
+  { id: 13, teamId: 4, title: '美美哒', artist: '门丽', genre: '健身操', duration: '3:42', coverUrl: 'https://picsum.photos/seed/song13/300/300', addictScore: 4.1, addictVotes: 112, battleCount: 0, battleWins: 0, createdAt: '2024-03-05T09:15:00Z' },
+  { id: 14, teamId: 4, title: '动起来', artist: '郭富城', genre: '健身操', duration: '3:38', coverUrl: 'https://picsum.photos/seed/song14/300/300', addictScore: 4.0, addictVotes: 98, battleCount: 0, battleWins: 0, createdAt: '2024-03-05T09:15:00Z' },
+  { id: 15, teamId: 4, title: '快乐崇拜', artist: '潘玮柏/张韶涵', genre: '健身操', duration: '4:05', coverUrl: 'https://picsum.photos/seed/song15/300/300', addictScore: 4.2, addictVotes: 134, battleCount: 0, battleWins: 0, createdAt: '2024-03-05T09:15:00Z' },
   
-  { id: 16, teamId: 5, title: '无价之姐', artist: '李宇春', genre: '爵士', duration: '3:02', coverUrl: 'https://picsum.photos/seed/song16/300/300', addictScore: 4.8, addictVotes: 267, createdAt: '2024-02-28T16:30:00Z' },
-  { id: 17, teamId: 5, title: '潇洒走一回', artist: '叶倩文', genre: '爵士', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song17/300/300', addictScore: 4.5, addictVotes: 189, createdAt: '2024-02-28T16:30:00Z' },
-  { id: 18, teamId: 5, title: '给我一个吻', artist: '张露', genre: '爵士', duration: '2:55', coverUrl: 'https://picsum.photos/seed/song18/300/300', addictScore: 4.3, addictVotes: 145, createdAt: '2024-02-28T16:30:00Z' },
-  { id: 19, teamId: 5, title: '我要你的爱', artist: '葛兰', genre: '爵士', duration: '3:12', coverUrl: 'https://picsum.photos/seed/song19/300/300', addictScore: 4.4, addictVotes: 156, createdAt: '2024-02-28T16:30:00Z' },
+  { id: 16, teamId: 5, title: '无价之姐', artist: '李宇春', genre: '爵士', duration: '3:02', coverUrl: 'https://picsum.photos/seed/song16/300/300', addictScore: 4.8, addictVotes: 267, battleCount: 0, battleWins: 0, createdAt: '2024-02-28T16:30:00Z' },
+  { id: 17, teamId: 5, title: '潇洒走一回', artist: '叶倩文', genre: '爵士', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song17/300/300', addictScore: 4.5, addictVotes: 189, battleCount: 0, battleWins: 0, createdAt: '2024-02-28T16:30:00Z' },
+  { id: 18, teamId: 5, title: '给我一个吻', artist: '张露', genre: '爵士', duration: '2:55', coverUrl: 'https://picsum.photos/seed/song18/300/300', addictScore: 4.3, addictVotes: 145, battleCount: 0, battleWins: 0, createdAt: '2024-02-28T16:30:00Z' },
+  { id: 19, teamId: 5, title: '我要你的爱', artist: '葛兰', genre: '爵士', duration: '3:12', coverUrl: 'https://picsum.photos/seed/song19/300/300', addictScore: 4.4, addictVotes: 156, battleCount: 0, battleWins: 0, createdAt: '2024-02-28T16:30:00Z' },
   
-  { id: 20, teamId: 6, title: '敖包相会', artist: '中国民歌', genre: '民族', duration: '4:25', coverUrl: 'https://picsum.photos/seed/song20/300/300', addictScore: 4.6, addictVotes: 178, createdAt: '2024-01-08T11:20:00Z' },
-  { id: 21, teamId: 6, title: '康定情歌', artist: '中国民歌', genre: '民族', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song21/300/300', addictScore: 4.4, addictVotes: 156, createdAt: '2024-01-08T11:20:00Z' },
-  { id: 22, teamId: 6, title: '在希望的田野上', artist: '彭丽媛', genre: '民族', duration: '3:55', coverUrl: 'https://picsum.photos/seed/song22/300/300', addictScore: 4.5, addictVotes: 167, createdAt: '2024-01-08T11:20:00Z' },
+  { id: 20, teamId: 6, title: '敖包相会', artist: '中国民歌', genre: '民族', duration: '4:25', coverUrl: 'https://picsum.photos/seed/song20/300/300', addictScore: 4.6, addictVotes: 178, battleCount: 0, battleWins: 0, createdAt: '2024-01-08T11:20:00Z' },
+  { id: 21, teamId: 6, title: '康定情歌', artist: '中国民歌', genre: '民族', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song21/300/300', addictScore: 4.4, addictVotes: 156, battleCount: 0, battleWins: 0, createdAt: '2024-01-08T11:20:00Z' },
+  { id: 22, teamId: 6, title: '在希望的田野上', artist: '彭丽媛', genre: '民族', duration: '3:55', coverUrl: 'https://picsum.photos/seed/song22/300/300', addictScore: 4.5, addictVotes: 167, battleCount: 0, battleWins: 0, createdAt: '2024-01-08T11:20:00Z' },
   
-  { id: 23, teamId: 7, title: '科目三', artist: '网络流行', genre: '流行', duration: '2:58', coverUrl: 'https://picsum.photos/seed/song23/300/300', addictScore: 4.9, addictVotes: 312, createdAt: '2024-03-12T13:40:00Z' },
-  { id: 24, teamId: 7, title: '爱你', artist: '王心凌', genre: '流行', duration: '3:25', coverUrl: 'https://picsum.photos/seed/song24/300/300', addictScore: 4.7, addictVotes: 234, createdAt: '2024-03-12T13:40:00Z' },
-  { id: 25, teamId: 7, title: '大花轿', artist: '火风', genre: '流行', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song25/300/300', addictScore: 4.5, addictVotes: 178, createdAt: '2024-03-12T13:40:00Z' },
+  { id: 23, teamId: 7, title: '科目三', artist: '网络流行', genre: '流行', duration: '2:58', coverUrl: 'https://picsum.photos/seed/song23/300/300', addictScore: 4.9, addictVotes: 312, battleCount: 0, battleWins: 0, createdAt: '2024-03-12T13:40:00Z' },
+  { id: 24, teamId: 7, title: '爱你', artist: '王心凌', genre: '流行', duration: '3:25', coverUrl: 'https://picsum.photos/seed/song24/300/300', addictScore: 4.7, addictVotes: 234, battleCount: 0, battleWins: 0, createdAt: '2024-03-12T13:40:00Z' },
+  { id: 25, teamId: 7, title: '大花轿', artist: '火风', genre: '流行', duration: '3:58', coverUrl: 'https://picsum.photos/seed/song25/300/300', addictScore: 4.5, addictVotes: 178, battleCount: 0, battleWins: 0, createdAt: '2024-03-12T13:40:00Z' },
   
-  { id: 26, teamId: 8, title: '鸿雁', artist: '呼斯楞', genre: '民族', duration: '4:15', coverUrl: 'https://picsum.photos/seed/song26/300/300', addictScore: 4.8, addictVotes: 245, createdAt: '2024-02-15T10:00:00Z' },
-  { id: 27, teamId: 8, title: '天堂', artist: '腾格尔', genre: '民族', duration: '4:32', coverUrl: 'https://picsum.photos/seed/song27/300/300', addictScore: 4.7, addictVotes: 223, createdAt: '2024-02-15T10:00:00Z' },
-  { id: 28, teamId: 8, title: '蒙古人', artist: '腾格尔', genre: '民族', duration: '4:18', coverUrl: 'https://picsum.photos/seed/song28/300/300', addictScore: 4.6, addictVotes: 198, createdAt: '2024-02-15T10:00:00Z' },
-  { id: 29, teamId: 8, title: '卓玛', artist: '亚东', genre: '民族', duration: '4:45', coverUrl: 'https://picsum.photos/seed/song29/300/300', addictScore: 4.5, addictVotes: 176, createdAt: '2024-02-15T10:00:00Z' },
+  { id: 26, teamId: 8, title: '鸿雁', artist: '呼斯楞', genre: '民族', duration: '4:15', coverUrl: 'https://picsum.photos/seed/song26/300/300', addictScore: 4.8, addictVotes: 245, battleCount: 0, battleWins: 0, createdAt: '2024-02-15T10:00:00Z' },
+  { id: 27, teamId: 8, title: '天堂', artist: '腾格尔', genre: '民族', duration: '4:32', coverUrl: 'https://picsum.photos/seed/song27/300/300', addictScore: 4.7, addictVotes: 223, battleCount: 0, battleWins: 0, createdAt: '2024-02-15T10:00:00Z' },
+  { id: 28, teamId: 8, title: '蒙古人', artist: '腾格尔', genre: '民族', duration: '4:18', coverUrl: 'https://picsum.photos/seed/song28/300/300', addictScore: 4.6, addictVotes: 198, battleCount: 0, battleWins: 0, createdAt: '2024-02-15T10:00:00Z' },
+  { id: 29, teamId: 8, title: '卓玛', artist: '亚东', genre: '民族', duration: '4:45', coverUrl: 'https://picsum.photos/seed/song29/300/300', addictScore: 4.5, addictVotes: 176, battleCount: 0, battleWins: 0, createdAt: '2024-02-15T10:00:00Z' },
   
-  { id: 30, teamId: 9, title: '开门红', artist: '火风/汤灿', genre: '民族', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song30/300/300', addictScore: 4.7, addictVotes: 212, createdAt: '2024-01-25T09:30:00Z' },
-  { id: 31, teamId: 9, title: '好日子', artist: '宋祖英', genre: '民族', duration: '3:22', coverUrl: 'https://picsum.photos/seed/song31/300/300', addictScore: 4.6, addictVotes: 198, createdAt: '2024-01-25T09:30:00Z' },
-  { id: 32, teamId: 9, title: '好运来', artist: '祖海', genre: '民族', duration: '3:35', coverUrl: 'https://picsum.photos/seed/song32/300/300', addictScore: 4.5, addictVotes: 176, createdAt: '2024-01-25T09:30:00Z' },
-  { id: 33, teamId: 9, title: '喜乐年华', artist: '陈红', genre: '民族', duration: '3:42', coverUrl: 'https://picsum.photos/seed/song33/300/300', addictScore: 4.4, addictVotes: 154, createdAt: '2024-01-25T09:30:00Z' },
-  { id: 34, teamId: 9, title: '恭喜发财', artist: '刘德华', genre: '民族', duration: '3:20', coverUrl: 'https://picsum.photos/seed/song34/300/300', addictScore: 4.3, addictVotes: 145, createdAt: '2024-01-25T09:30:00Z' },
+  { id: 30, teamId: 9, title: '开门红', artist: '火风/汤灿', genre: '民族', duration: '3:45', coverUrl: 'https://picsum.photos/seed/song30/300/300', addictScore: 4.7, addictVotes: 212, battleCount: 0, battleWins: 0, createdAt: '2024-01-25T09:30:00Z' },
+  { id: 31, teamId: 9, title: '好日子', artist: '宋祖英', genre: '民族', duration: '3:22', coverUrl: 'https://picsum.photos/seed/song31/300/300', addictScore: 4.6, addictVotes: 198, battleCount: 0, battleWins: 0, createdAt: '2024-01-25T09:30:00Z' },
+  { id: 32, teamId: 9, title: '好运来', artist: '祖海', genre: '民族', duration: '3:35', coverUrl: 'https://picsum.photos/seed/song32/300/300', addictScore: 4.5, addictVotes: 176, battleCount: 0, battleWins: 0, createdAt: '2024-01-25T09:30:00Z' },
+  { id: 33, teamId: 9, title: '喜乐年华', artist: '陈红', genre: '民族', duration: '3:42', coverUrl: 'https://picsum.photos/seed/song33/300/300', addictScore: 4.4, addictVotes: 154, battleCount: 0, battleWins: 0, createdAt: '2024-01-25T09:30:00Z' },
+  { id: 34, teamId: 9, title: '恭喜发财', artist: '刘德华', genre: '民族', duration: '3:20', coverUrl: 'https://picsum.photos/seed/song34/300/300', addictScore: 4.3, addictVotes: 145, battleCount: 0, battleWins: 0, createdAt: '2024-01-25T09:30:00Z' },
   
-  { id: 35, teamId: 10, title: 'Despacito', artist: 'Luis Fonsi', genre: '拉丁', duration: '3:48', coverUrl: 'https://picsum.photos/seed/song35/300/300', addictScore: 4.8, addictVotes: 256, createdAt: '2024-03-01T14:15:00Z' },
-  { id: 36, teamId: 10, title: 'Smooth', artist: 'Santana', genre: '拉丁', duration: '4:02', coverUrl: 'https://picsum.photos/seed/song36/300/300', addictScore: 4.6, addictVotes: 201, createdAt: '2024-03-01T14:15:00Z' },
-  { id: 37, teamId: 10, title: 'Havana', artist: 'Camila Cabello', genre: '拉丁', duration: '3:38', coverUrl: 'https://picsum.photos/seed/song37/300/300', addictScore: 4.5, addictVotes: 189, createdAt: '2024-03-01T14:15:00Z' },
-  { id: 38, teamId: 10, title: 'Shape of You', artist: 'Ed Sheeran', genre: '拉丁', duration: '3:55', coverUrl: 'https://picsum.photos/seed/song38/300/300', addictScore: 4.4, addictVotes: 167, createdAt: '2024-03-01T14:15:00Z' }
+  { id: 35, teamId: 10, title: 'Despacito', artist: 'Luis Fonsi', genre: '拉丁', duration: '3:48', coverUrl: 'https://picsum.photos/seed/song35/300/300', addictScore: 4.8, addictVotes: 256, battleCount: 0, battleWins: 0, createdAt: '2024-03-01T14:15:00Z' },
+  { id: 36, teamId: 10, title: 'Smooth', artist: 'Santana', genre: '拉丁', duration: '4:02', coverUrl: 'https://picsum.photos/seed/song36/300/300', addictScore: 4.6, addictVotes: 201, battleCount: 0, battleWins: 0, createdAt: '2024-03-01T14:15:00Z' },
+  { id: 37, teamId: 10, title: 'Havana', artist: 'Camila Cabello', genre: '拉丁', duration: '3:38', coverUrl: 'https://picsum.photos/seed/song37/300/300', addictScore: 4.5, addictVotes: 189, battleCount: 0, battleWins: 0, createdAt: '2024-03-01T14:15:00Z' },
+  { id: 38, teamId: 10, title: 'Shape of You', artist: 'Ed Sheeran', genre: '拉丁', duration: '3:55', coverUrl: 'https://picsum.photos/seed/song38/300/300', addictScore: 4.4, addictVotes: 167, battleCount: 0, battleWins: 0, createdAt: '2024-03-01T14:15:00Z' }
 ];
 
 export const mockComments: TeamComment[] = [

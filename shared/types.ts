@@ -39,6 +39,8 @@ export interface Song {
   coverUrl: string;
   addictScore: number;
   addictVotes: number;
+  battleCount: number;
+  battleWins: number;
   createdAt: string;
 }
 
@@ -74,6 +76,27 @@ export interface BattlePair {
   song2: Song;
   team1: Team;
   team2: Team;
+}
+
+export interface BattleRecord {
+  id: number;
+  song1Id: number;
+  song2Id: number;
+  song1Title: string;
+  song2Title: string;
+  team1Id: number;
+  team2Id: number;
+  team1Name: string;
+  team2Name: string;
+  winnerSongId: number;
+  song1Score: number;
+  song2Score: number;
+  createdAt: string;
+}
+
+export interface BattleRecordWithDetails extends BattleRecord {
+  song1?: Song;
+  song2?: Song;
 }
 
 export interface PaginatedResponse<T> {

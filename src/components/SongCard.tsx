@@ -22,6 +22,11 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
     ? userVotes.some(v => v.type === 'addict' && v.targetId === song.id)
     : false;
 
+  const getWinRate = (battleCount: number, battleWins: number) => {
+    if (battleCount === 0) return '0%';
+    return `${Math.round((battleWins / battleCount) * 100)}%`;
+  };
+
   const handleVote = async (score: number) => {
     if (!user) {
       setShowNicknameModal(true);
@@ -73,9 +78,14 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
                 <p className="text-orange-600 text-xs mt-1">🎤 {teamName}</p>
               )}
             </div>
-            <span className="px-2 py-1 bg-orange-100 text-orange-600 text-xs font-medium rounded-full">
-              {song.genre}
-            </span>
+            <div className="flex items-center space-x-2">
+              <span className="px-2 py-1 bg-orange-100 text-orange-600 text-xs font-medium rounded-full">
+                {song.genre}
+              </span>
+              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                胜率 {getWinRate(song.battleCount, song.battleWins)}
+              </span>
+            </div>
           </div>
 
           <div className="flex items-center space-x-4 mt-3">

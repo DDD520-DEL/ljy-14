@@ -265,7 +265,9 @@ export class ImportService {
                 artist: song.artist ?? '未知歌手',
                 genre: song.genre ?? '流行',
                 duration: song.duration ?? '3:30',
-                coverUrl: song.coverUrl ?? DEFAULT_SONG_COVER
+                coverUrl: song.coverUrl ?? DEFAULT_SONG_COVER,
+                battleCount: 0,
+                battleWins: 0
               };
               await songRepository.create(newSong);
             } catch (songError) {

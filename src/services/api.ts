@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -137,6 +137,15 @@ export const mapApi = {
 
 export const battleApi = {
   getPair: () => request<BattlePair>('/battle/pair'),
+  recordResult: (data: { winnerSongId: number; loserSongId: number; winnerScore?: number; loserScore?: number }) => 
+    request<{ success: boolean; record: BattleRecord }>('/battle/record', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getSongRecords: (songId: number) => request<BattleRecord[]>(`/battle/song/${songId}`),
+  getTeamRecords: (teamId: number) => request<BattleRecord[]>(`/battle/team/${teamId}`),
+  getSongStats: (songId: number) => request<{ battleCount: number; battleWins: number; winRate: number }>(`/battle/song/${songId}/stats`),
+  getTeamStats: (teamId: number) => request<{ totalBattles: number; totalWins: number; totalLosses: number; winRate: number }>(`/battle/team/${teamId}/stats`),
 };
 
 export const commentApi = {

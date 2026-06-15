@@ -222,7 +222,9 @@
       "coverUrl": "https://picsum.photos/seed/song1/300/300",
       "addictScore": 4.8,
       "addictVotes": 256,
-      "createdAt": "2024-01-15T10:30:00Z"
+      "createdAt": "2024-01-15T10:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 2,
@@ -234,7 +236,9 @@
       "coverUrl": "https://picsum.photos/seed/song2/300/300",
       "addictScore": 4.6,
       "addictVotes": 198,
-      "createdAt": "2024-01-15T10:30:00Z"
+      "createdAt": "2024-01-15T10:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 3,
@@ -246,7 +250,9 @@
       "coverUrl": "https://picsum.photos/seed/song3/300/300",
       "addictScore": 4.5,
       "addictVotes": 176,
-      "createdAt": "2024-01-15T10:30:00Z"
+      "createdAt": "2024-01-15T10:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 4,
@@ -258,7 +264,9 @@
       "coverUrl": "https://picsum.photos/seed/song4/300/300",
       "addictScore": 4.3,
       "addictVotes": 145,
-      "createdAt": "2024-01-15T10:30:00Z"
+      "createdAt": "2024-01-15T10:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 5,
@@ -270,7 +278,9 @@
       "coverUrl": "https://picsum.photos/seed/song5/300/300",
       "addictScore": 4.7,
       "addictVotes": 234,
-      "createdAt": "2024-02-10T08:20:00Z"
+      "createdAt": "2024-02-10T08:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 6,
@@ -282,7 +292,9 @@
       "coverUrl": "https://picsum.photos/seed/song6/300/300",
       "addictScore": 4.4,
       "addictVotes": 167,
-      "createdAt": "2024-02-10T08:20:00Z"
+      "createdAt": "2024-02-10T08:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 7,
@@ -294,7 +306,9 @@
       "coverUrl": "https://picsum.photos/seed/song7/300/300",
       "addictScore": 4.2,
       "addictVotes": 123,
-      "createdAt": "2024-02-10T08:20:00Z"
+      "createdAt": "2024-02-10T08:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 8,
@@ -306,7 +320,9 @@
       "coverUrl": "https://picsum.photos/seed/song8/300/300",
       "addictScore": 4.9,
       "addictVotes": 289,
-      "createdAt": "2024-01-20T14:45:00Z"
+      "createdAt": "2024-01-20T14:45:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 9,
@@ -318,7 +334,9 @@
       "coverUrl": "https://picsum.photos/seed/song9/300/300",
       "addictScore": 4.7,
       "addictVotes": 201,
-      "createdAt": "2024-01-20T14:45:00Z"
+      "createdAt": "2024-01-20T14:45:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 10,
@@ -330,7 +348,9 @@
       "coverUrl": "https://picsum.photos/seed/song10/300/300",
       "addictScore": 4.6,
       "addictVotes": 189,
-      "createdAt": "2024-01-20T14:45:00Z"
+      "createdAt": "2024-01-20T14:45:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 11,
@@ -342,7 +362,9 @@
       "coverUrl": "https://picsum.photos/seed/song11/300/300",
       "addictScore": 4.5,
       "addictVotes": 178,
-      "createdAt": "2024-03-05T09:15:00Z"
+      "createdAt": "2024-03-05T09:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 12,
@@ -354,7 +376,9 @@
       "coverUrl": "https://picsum.photos/seed/song12/300/300",
       "addictScore": 4.3,
       "addictVotes": 145,
-      "createdAt": "2024-03-05T09:15:00Z"
+      "createdAt": "2024-03-05T09:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 13,
@@ -366,7 +390,9 @@
       "coverUrl": "https://picsum.photos/seed/song13/300/300",
       "addictScore": 4.1,
       "addictVotes": 112,
-      "createdAt": "2024-03-05T09:15:00Z"
+      "createdAt": "2024-03-05T09:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 14,
@@ -378,7 +404,9 @@
       "coverUrl": "https://picsum.photos/seed/song14/300/300",
       "addictScore": 4,
       "addictVotes": 98,
-      "createdAt": "2024-03-05T09:15:00Z"
+      "createdAt": "2024-03-05T09:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 15,
@@ -390,7 +418,9 @@
       "coverUrl": "https://picsum.photos/seed/song15/300/300",
       "addictScore": 4.2,
       "addictVotes": 134,
-      "createdAt": "2024-03-05T09:15:00Z"
+      "createdAt": "2024-03-05T09:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 16,
@@ -402,7 +432,9 @@
       "coverUrl": "https://picsum.photos/seed/song16/300/300",
       "addictScore": 4.8,
       "addictVotes": 267,
-      "createdAt": "2024-02-28T16:30:00Z"
+      "createdAt": "2024-02-28T16:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 17,
@@ -414,7 +446,9 @@
       "coverUrl": "https://picsum.photos/seed/song17/300/300",
       "addictScore": 4.5,
       "addictVotes": 189,
-      "createdAt": "2024-02-28T16:30:00Z"
+      "createdAt": "2024-02-28T16:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 18,
@@ -426,7 +460,9 @@
       "coverUrl": "https://picsum.photos/seed/song18/300/300",
       "addictScore": 4.3,
       "addictVotes": 145,
-      "createdAt": "2024-02-28T16:30:00Z"
+      "createdAt": "2024-02-28T16:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 19,
@@ -438,7 +474,9 @@
       "coverUrl": "https://picsum.photos/seed/song19/300/300",
       "addictScore": 4.4,
       "addictVotes": 156,
-      "createdAt": "2024-02-28T16:30:00Z"
+      "createdAt": "2024-02-28T16:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 20,
@@ -450,7 +488,9 @@
       "coverUrl": "https://picsum.photos/seed/song20/300/300",
       "addictScore": 4.6,
       "addictVotes": 178,
-      "createdAt": "2024-01-08T11:20:00Z"
+      "createdAt": "2024-01-08T11:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 21,
@@ -462,7 +502,9 @@
       "coverUrl": "https://picsum.photos/seed/song21/300/300",
       "addictScore": 4.4,
       "addictVotes": 156,
-      "createdAt": "2024-01-08T11:20:00Z"
+      "createdAt": "2024-01-08T11:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 22,
@@ -474,7 +516,9 @@
       "coverUrl": "https://picsum.photos/seed/song22/300/300",
       "addictScore": 4.5,
       "addictVotes": 167,
-      "createdAt": "2024-01-08T11:20:00Z"
+      "createdAt": "2024-01-08T11:20:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 23,
@@ -486,7 +530,9 @@
       "coverUrl": "https://picsum.photos/seed/song23/300/300",
       "addictScore": 4.9,
       "addictVotes": 312,
-      "createdAt": "2024-03-12T13:40:00Z"
+      "createdAt": "2024-03-12T13:40:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 24,
@@ -498,7 +544,9 @@
       "coverUrl": "https://picsum.photos/seed/song24/300/300",
       "addictScore": 4.7,
       "addictVotes": 234,
-      "createdAt": "2024-03-12T13:40:00Z"
+      "createdAt": "2024-03-12T13:40:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 25,
@@ -510,7 +558,9 @@
       "coverUrl": "https://picsum.photos/seed/song25/300/300",
       "addictScore": 4.5,
       "addictVotes": 178,
-      "createdAt": "2024-03-12T13:40:00Z"
+      "createdAt": "2024-03-12T13:40:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 26,
@@ -522,7 +572,9 @@
       "coverUrl": "https://picsum.photos/seed/song26/300/300",
       "addictScore": 4.8,
       "addictVotes": 245,
-      "createdAt": "2024-02-15T10:00:00Z"
+      "createdAt": "2024-02-15T10:00:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 27,
@@ -534,7 +586,9 @@
       "coverUrl": "https://picsum.photos/seed/song27/300/300",
       "addictScore": 4.7,
       "addictVotes": 223,
-      "createdAt": "2024-02-15T10:00:00Z"
+      "createdAt": "2024-02-15T10:00:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 28,
@@ -546,7 +600,9 @@
       "coverUrl": "https://picsum.photos/seed/song28/300/300",
       "addictScore": 4.6,
       "addictVotes": 198,
-      "createdAt": "2024-02-15T10:00:00Z"
+      "createdAt": "2024-02-15T10:00:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 29,
@@ -558,7 +614,9 @@
       "coverUrl": "https://picsum.photos/seed/song29/300/300",
       "addictScore": 4.5,
       "addictVotes": 176,
-      "createdAt": "2024-02-15T10:00:00Z"
+      "createdAt": "2024-02-15T10:00:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 30,
@@ -570,7 +628,9 @@
       "coverUrl": "https://picsum.photos/seed/song30/300/300",
       "addictScore": 4.7,
       "addictVotes": 212,
-      "createdAt": "2024-01-25T09:30:00Z"
+      "createdAt": "2024-01-25T09:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 31,
@@ -582,7 +642,9 @@
       "coverUrl": "https://picsum.photos/seed/song31/300/300",
       "addictScore": 4.6,
       "addictVotes": 198,
-      "createdAt": "2024-01-25T09:30:00Z"
+      "createdAt": "2024-01-25T09:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 32,
@@ -594,7 +656,9 @@
       "coverUrl": "https://picsum.photos/seed/song32/300/300",
       "addictScore": 4.5,
       "addictVotes": 176,
-      "createdAt": "2024-01-25T09:30:00Z"
+      "createdAt": "2024-01-25T09:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 33,
@@ -606,7 +670,9 @@
       "coverUrl": "https://picsum.photos/seed/song33/300/300",
       "addictScore": 4.4,
       "addictVotes": 154,
-      "createdAt": "2024-01-25T09:30:00Z"
+      "createdAt": "2024-01-25T09:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 34,
@@ -618,7 +684,9 @@
       "coverUrl": "https://picsum.photos/seed/song34/300/300",
       "addictScore": 4.3,
       "addictVotes": 145,
-      "createdAt": "2024-01-25T09:30:00Z"
+      "createdAt": "2024-01-25T09:30:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 35,
@@ -630,7 +698,9 @@
       "coverUrl": "https://picsum.photos/seed/song35/300/300",
       "addictScore": 4.8,
       "addictVotes": 256,
-      "createdAt": "2024-03-01T14:15:00Z"
+      "createdAt": "2024-03-01T14:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 36,
@@ -642,7 +712,9 @@
       "coverUrl": "https://picsum.photos/seed/song36/300/300",
       "addictScore": 4.6,
       "addictVotes": 201,
-      "createdAt": "2024-03-01T14:15:00Z"
+      "createdAt": "2024-03-01T14:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 37,
@@ -654,7 +726,9 @@
       "coverUrl": "https://picsum.photos/seed/song37/300/300",
       "addictScore": 4.5,
       "addictVotes": 189,
-      "createdAt": "2024-03-01T14:15:00Z"
+      "createdAt": "2024-03-01T14:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     },
     {
       "id": 38,
@@ -666,7 +740,9 @@
       "coverUrl": "https://picsum.photos/seed/song38/300/300",
       "addictScore": 4.4,
       "addictVotes": 167,
-      "createdAt": "2024-03-01T14:15:00Z"
+      "createdAt": "2024-03-01T14:15:00Z",
+      "battleCount": 0,
+      "battleWins": 0
     }
   ],
   "votes": [
@@ -9278,5 +9354,6 @@
       "parkName": "八角游乐园南广场",
       "createdAt": "2024-06-11T08:00:00Z"
     }
-  ]
+  ],
+  "battleRecords": []
 }

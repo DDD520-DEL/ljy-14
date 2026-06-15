@@ -32,7 +32,9 @@ export default function TeamDetailPage() {
     fetchCompletedInvitations,
     createInvitation,
     acceptInvitation,
-    rejectInvitation
+    rejectInvitation,
+    teamBattleStats,
+    fetchTeamBattleStats
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
@@ -62,6 +64,7 @@ export default function TeamDetailPage() {
       fetchTeamComments(parseInt(id));
       fetchPendingInvitations(parseInt(id));
       fetchCompletedInvitations(parseInt(id));
+      fetchTeamBattleStats(parseInt(id));
       setCommentContent('');
       setCommentRating(0);
       setCommentSubmitted(false);
@@ -236,6 +239,11 @@ export default function TeamDetailPage() {
     if (teamComments.length === 0) return 0;
     const total = teamComments.reduce((sum, c) => sum + c.rating, 0);
     return total / teamComments.length;
+  };
+
+  const getWinRate = (battleCount: number, battleWins: number) => {
+    if (battleCount === 0) return '0%';
+    return `${Math.round((battleWins / battleCount) * 100)}%`;
   };
 
   if (loading) {
@@ -490,6 +498,35 @@ export default function TeamDetailPage() {
 
               {activeTab === 'songs' && (
                 <div className="space-y-4">
+                  {teamBattleStats && (
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 mb-6">
+                      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                        <span className="text-2xl">🏆</span>
+                        <span>PK 总战绩</span>
+                      </h3>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-gray-800">{teamBattleStats.totalBattles}</div>
+                          <p className="text-sm text-gray-500">总场次</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-green-600">{teamBattleStats.totalWins}</div>
+                          <p className="text-sm text-gray-500">胜场</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-red-500">{teamBattleStats.totalLosses}</div>
+                          <p className="text-sm text-gray-500">负场</p>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
+                            {getWinRate(teamBattleStats.totalBattles, teamBattleStats.totalWins)}
+                          </div>
+                          <p className="text-sm text-gray-500">胜率</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   {teamSongs.length > 0 ? (
                     teamSongs.map((song: Song, index: number) => (
                       <div
@@ -515,6 +552,14 @@ export default function TeamDetailPage() {
                                 {song.title}
                               </h4>
                               <p className="text-gray-500">{song.artist} · {song.genre} · {song.duration}</p>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">
+                                  胜率 {getWinRate(song.battleCount, song.battleWins)}
+                                </span>
+                                <span className="text-xs text-gray-400">
+                                  {song.battleCount} 场 PK
+                                </span>
+                              </div>
                             </div>
                           </div>
                           <div className="text-right">

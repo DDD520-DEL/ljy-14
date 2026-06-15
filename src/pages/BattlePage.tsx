@@ -4,15 +4,17 @@ import { useBattleStore, useUserStore } from '../store/useStore';
 import { Link } from 'react-router-dom';
 
 export default function BattlePage() {
-  const { battlePair, fetchBattlePair, voteAddict } = useBattleStore();
+  const { battlePair, fetchBattlePair, voteAddict, recordBattleResult } = useBattleStore();
   const { user, setShowNicknameModal } = useUserStore();
   const [votedSong1, setVotedSong1] = useState(false);
   const [votedSong2, setVotedSong2] = useState(false);
   const [message, setMessage] = useState('');
   const [showAnimation, setShowAnimation] = useState<number | null>(null);
+  const [battleRecorded, setBattleRecorded] = useState(false);
 
   useEffect(() => {
     fetchBattlePair();
+    setBattleRecorded(false);
   }, []);
 
   const handleVote = async (songId: number, isSong1: boolean) => {
@@ -32,6 +34,13 @@ export default function BattlePage() {
     if (result.success) {
       if (isSong1) setVotedSong1(true);
       else setVotedSong2(true);
+      
+      if (!battleRecorded && battlePair) {
+        const loserSongId = isSong1 ? battlePair.song2.id : battlePair.song1.id;
+        await recordBattleResult(songId, loserSongId);
+        setBattleRecorded(true);
+      }
+      
       setMessage('投票成功！感谢参与！');
     } else {
       setMessage(result.message || '投票失败');
@@ -45,6 +54,7 @@ export default function BattlePage() {
     setVotedSong1(false);
     setVotedSong2(false);
     setMessage('');
+    setBattleRecorded(false);
   };
 
   if (!battlePair) {
@@ -60,6 +70,11 @@ export default function BattlePage() {
   const totalVotes = totalVotes1 + totalVotes2;
   const percentage1 = totalVotes > 0 ? (totalVotes1 / totalVotes) * 100 : 50;
   const percentage2 = totalVotes > 0 ? (totalVotes2 / totalVotes) * 100 : 50;
+
+  const getWinRate = (battleCount: number, battleWins: number) => {
+    if (battleCount === 0) return '0%';
+    return `${Math.round((battleWins / battleCount) * 100)}%`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50 pt-24 pb-12">
@@ -124,6 +139,12 @@ export default function BattlePage() {
                   <span className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-sm">
                     {battlePair.song1.genre}
                   </span>
+                  <span className="ml-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                    胜率 {getWinRate(battlePair.song1.battleCount, battlePair.song1.battleWins)}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  共参与 {battlePair.song1.battleCount} 场 PK，胜 {battlePair.song1.battleWins} 场
                 </p>
               </div>
 
@@ -206,6 +227,12 @@ export default function BattlePage() {
                   <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm">
                     {battlePair.song2.genre}
                   </span>
+                  <span className="ml-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                    胜率 {getWinRate(battlePair.song2.battleCount, battlePair.song2.battleWins)}
+                  </span>
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  共参与 {battlePair.song2.battleCount} 场 PK，胜 {battlePair.song2.battleWins} 场
                 </p>
               </div>
 

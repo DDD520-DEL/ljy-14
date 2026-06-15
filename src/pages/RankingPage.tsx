@@ -29,6 +29,11 @@ export default function RankingPage() {
     return <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-600 font-bold">{rank}</div>;
   };
 
+  const getWinRate = (battleCount: number, battleWins: number) => {
+    if (battleCount === 0) return '0%';
+    return `${Math.round((battleWins / battleCount) * 100)}%`;
+  };
+
   const renderComprehensiveRanking = () => {
     if (loading.comprehensive) {
       return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-4 border-yellow-500 border-t-transparent"></div></div>;
@@ -193,6 +198,9 @@ export default function RankingPage() {
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-sm">
                       {song.genre}
+                    </span>
+                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm">
+                      胜率 {getWinRate(song.battleCount, song.battleWins)}
                     </span>
                     <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
                       {song.duration}

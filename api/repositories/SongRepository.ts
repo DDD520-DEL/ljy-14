@@ -15,13 +15,15 @@ export class SongRepository {
     return db.data.songs.find(s => s.id === id);
   }
 
-  async create(song: Omit<Song, 'id' | 'createdAt' | 'addictScore' | 'addictVotes'>): Promise<Song> {
+  async create(song: Omit<Song, 'id' | 'createdAt' | 'addictScore' | 'addictVotes' | 'battleCount' | 'battleWins'>): Promise<Song> {
     await db.read();
     const newSong: Song = {
       ...song,
       id: Math.max(0, ...db.data.songs.map(s => s.id)) + 1,
       addictScore: 0,
       addictVotes: 0,
+      battleCount: 0,
+      battleWins: 0,
       createdAt: new Date().toISOString()
     };
     db.data.songs.push(newSong);
@@ -45,6 +47,25 @@ export class SongRepository {
     if (song) {
       song.addictScore = score;
       song.addictVotes = votes;
+      await saveDatabase();
+    }
+  }
+
+  async incrementBattleWin(id: number): Promise<void> {
+    await db.read();
+    const song = db.data.songs.find(s => s.id === id);
+    if (song) {
+      song.battleCount += 1;
+      song.battleWins += 1;
+      await saveDatabase();
+    }
+  }
+
+  async incrementBattleLoss(id: number): Promise<void> {
+    await db.read();
+    const song = db.data.songs.find(s => s.id === id);
+    if (song) {
+      song.battleCount += 1;
       await saveDatabase();
     }
   }
