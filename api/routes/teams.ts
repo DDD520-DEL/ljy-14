@@ -10,6 +10,7 @@ router.get('/', teamController.getTeams.bind(teamController));
 router.get('/:id', teamController.getTeamById.bind(teamController));
 router.post('/', teamController.createTeam.bind(teamController));
 router.put('/:id', teamController.updateTeam.bind(teamController));
+router.post('/import', teamController.getUploadMiddleware(), teamController.importTeams.bind(teamController));
 
 router.get('/:teamId/songs', songController.getSongsByTeamId.bind(songController));
 router.post('/:teamId/songs', songController.addSong.bind(songController));

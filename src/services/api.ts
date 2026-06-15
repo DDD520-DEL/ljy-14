@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -56,6 +56,15 @@ export const teamApi = {
   deleteSong: (id: number) => request<{ success: boolean }>(`/teams/songs/${id}`, {
     method: 'DELETE',
   }),
+
+  importTeams: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return fetch('/api/teams/import', {
+      method: 'POST',
+      body: formData,
+    }).then(res => res.json()) as Promise<ImportResult>;
+  },
 };
 
 export const voteApi = {

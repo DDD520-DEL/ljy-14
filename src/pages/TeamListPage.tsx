@@ -1,12 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTeamStore, useFilterStore } from '../store/useStore';
 import TeamCard from '../components/TeamCard';
 import FilterBar from '../components/FilterBar';
-import { Users } from 'lucide-react';
+import BatchImportModal from '../components/BatchImportModal';
+import { Users, Upload } from 'lucide-react';
 
 export default function TeamListPage() {
   const { teams, loading, error, fetchTeams } = useTeamStore();
   const { district, style, memberCount } = useFilterStore();
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     fetchTeams({ district, style, memberCount });
@@ -43,10 +45,17 @@ export default function TeamListPage() {
           </div>
         ) : teams.length > 0 ? (
           <>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
               <p className="text-gray-600">
                 共找到 <span className="font-bold text-orange-600">{teams.length}</span> 支舞队
               </p>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-xl shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-red-600 transition-all transform hover:-translate-y-0.5"
+              >
+                <Upload className="w-5 h-5" />
+                批量导入舞队
+              </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {teams.map((team, index) => (
@@ -62,6 +71,7 @@ export default function TeamListPage() {
           </div>
         )}
       </div>
+      <BatchImportModal isOpen={showImportModal} onClose={() => setShowImportModal(false)} />
     </div>
   );
 }

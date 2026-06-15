@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { TeamService } from '../services/TeamService.js';
+import { ImportService } from '../services/ImportService.js';
+import multer from 'multer';
 
 const teamService = new TeamService();
+const importService = new ImportService();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 export class TeamController {
   async getTeams(req: Request, res: Response): Promise<void> {
@@ -67,5 +71,56 @@ export class TeamController {
     } catch (error) {
       res.status(500).json({ error: '更新舞队失败' });
     }
+  }
+
+  async importTeams(req: Request, res: Response): Promise<void> {
+    try {
+      if (!req.file) {
+        res.status(400).json({ 
+          success: false, 
+          totalCount: 0,
+          successCount: 0,
+          failCount: 0,
+          duplicateCount: 0,
+          errors: [{ row: 0, message: '请上传Excel文件' }]
+        });
+        return;
+      }
+
+      const validMimeTypes = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel'
+      ];
+      const validExtensions = ['.xlsx', '.xls'];
+      const fileExtension = req.file.originalname.slice(req.file.originalname.lastIndexOf('.')).toLowerCase();
+      
+      if (!validMimeTypes.includes(req.file.mimetype) && !validExtensions.includes(fileExtension)) {
+        res.status(400).json({ 
+          success: false, 
+          totalCount: 0,
+          successCount: 0,
+          failCount: 0,
+          duplicateCount: 0,
+          errors: [{ row: 0, message: '文件格式不正确，请上传 .xlsx 或 .xls 文件' }]
+        });
+        return;
+      }
+
+      const result = await importService.importTeamsFromExcel(req.file.buffer);
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        totalCount: 0,
+        successCount: 0,
+        failCount: 0,
+        duplicateCount: 0,
+        errors: [{ row: 0, message: `导入失败：${(error as Error).message}` }]
+      });
+    }
+  }
+
+  getUploadMiddleware() {
+    return upload.single('file');
   }
 }

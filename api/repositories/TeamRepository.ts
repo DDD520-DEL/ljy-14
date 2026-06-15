@@ -42,6 +42,11 @@ export class TeamRepository {
     return db.data.teams.find(t => t.id === id);
   }
 
+  async findByName(name: string): Promise<Team | undefined> {
+    await db.read();
+    return db.data.teams.find(t => t.name === name);
+  }
+
   async create(team: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes'>): Promise<Team> {
     await db.read();
     const newTeam: Team = {

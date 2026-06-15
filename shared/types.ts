@@ -184,3 +184,41 @@ export interface PostResponse {
   post?: TeamPost;
   message?: string;
 }
+
+export interface ImportResult {
+  success: boolean;
+  totalCount: number;
+  successCount: number;
+  failCount: number;
+  duplicateCount: number;
+  errors: Array<{
+    row: number;
+    name?: string;
+    message: string;
+  }>;
+}
+
+export interface TeamImportRow {
+  name: string;
+  leader: string;
+  phone: string;
+  establishedAt: string;
+  memberCount: number;
+  district: string;
+  style: string;
+  description?: string;
+  parkName?: string;
+  parkLat?: number;
+  parkLng?: number;
+  activityTime?: string;
+  avatar?: string;
+  groupPhoto?: string;
+  costumePhoto?: string;
+  songs?: Array<{
+    title: string;
+    artist?: string;
+    genre?: string;
+    duration?: string;
+    coverUrl?: string;
+  }>;
+}
