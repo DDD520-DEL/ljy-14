@@ -439,7 +439,7 @@ export const useMapStore = create<MapState>((set) => ({
 
 interface FavoriteState {
   favoriteIds: number[];
-  toggleFavorite: (teamId: number, userId?: number) => void;
+  toggleFavorite: (teamId: number, userId?: number) => Promise<void>;
   isFavorite: (teamId: number) => boolean;
   clearFavorites: () => void;
   syncToServer: (userId: number) => Promise<void>;
@@ -450,15 +450,28 @@ export const useFavoriteStore = create<FavoriteState>()(
   persist(
     (set, get) => ({
       favoriteIds: [],
-      toggleFavorite: (teamId, userId) => {
+      toggleFavorite: async (teamId, userId) => {
         const { favoriteIds } = get();
-        if (favoriteIds.includes(teamId)) {
-          set({ favoriteIds: favoriteIds.filter((id) => id !== teamId) });
-        } else {
-          set({ favoriteIds: [...favoriteIds, teamId] });
-        }
-        if (userId) {
-          favoriteApi.toggleFavorite(userId, teamId).catch(console.error);
+        const wasFavorited = favoriteIds.includes(teamId);
+        const optimisticIds = wasFavorited
+          ? favoriteIds.filter((id) => id !== teamId)
+          : [...favoriteIds, teamId];
+        set({ favoriteIds: optimisticIds });
+
+        if (!userId) return;
+
+        try {
+          const result = await favoriteApi.toggleFavorite(userId, teamId);
+          const serverFavorited = result.favorited;
+          if (serverFavorited !== !wasFavorited) {
+            const finalIds = serverFavorited
+              ? [...new Set([...get().favoriteIds, teamId])]
+              : get().favoriteIds.filter((id) => id !== teamId);
+            set({ favoriteIds: finalIds });
+          }
+        } catch (error) {
+          console.error('切换收藏失败，回滚状态', error);
+          set({ favoriteIds: wasFavorited ? [...favoriteIds] : favoriteIds });
         }
       },
       isFavorite: (teamId) => get().favoriteIds.includes(teamId),
