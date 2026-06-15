@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -284,5 +284,43 @@ export const checkInApi = {
   checkIn: (userId: number) =>
     request<CheckInResponse>(`/check-ins/${userId}/check-in`, {
       method: 'POST',
+    }),
+};
+
+export const encyclopediaApi = {
+  getArticles: (filters?: {
+    page?: number;
+    pageSize?: number;
+    category?: EncyclopediaCategory;
+    keyword?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
+    if (filters?.pageSize !== undefined) params.append('pageSize', filters.pageSize.toString());
+    if (filters?.category) params.append('category', filters.category);
+    if (filters?.keyword) params.append('keyword', filters.keyword);
+    
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return request<EncyclopediaListResponse>(`/encyclopedia${query}`);
+  },
+
+  getArticleById: (id: number) =>
+    request<EncyclopediaResponse>(`/encyclopedia/${id}`),
+
+  createArticle: (data: CreateEncyclopediaRequest) =>
+    request<EncyclopediaResponse>('/encyclopedia', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateArticle: (id: number, data: UpdateEncyclopediaRequest) =>
+    request<EncyclopediaResponse>(`/encyclopedia/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteArticle: (id: number) =>
+    request<{ success: boolean; message?: string }>(`/encyclopedia/${id}`, {
+      method: 'DELETE',
     }),
 };

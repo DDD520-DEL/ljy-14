@@ -320,3 +320,52 @@ export interface CheckInResponse {
   record?: CheckInRecord;
   status?: CheckInStatus;
 }
+
+export type EncyclopediaCategory = 'dance_skill' | 'fitness_tip' | 'safety_tip';
+
+export interface EncyclopediaArticle {
+  id: number;
+  title: string;
+  category: EncyclopediaCategory;
+  summary: string;
+  content: string;
+  coverImage: string;
+  images: string[];
+  author: string;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateEncyclopediaRequest {
+  title: string;
+  category: EncyclopediaCategory;
+  summary: string;
+  content: string;
+  coverImage: string;
+  images?: string[];
+  author: string;
+}
+
+export interface UpdateEncyclopediaRequest {
+  title?: string;
+  category?: EncyclopediaCategory;
+  summary?: string;
+  content?: string;
+  coverImage?: string;
+  images?: string[];
+  author?: string;
+}
+
+export interface EncyclopediaResponse {
+  success: boolean;
+  article?: EncyclopediaArticle;
+  message?: string;
+}
+
+export interface EncyclopediaListResponse {
+  data: EncyclopediaArticle[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

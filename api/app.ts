@@ -25,6 +25,7 @@ import postsRoutes from './routes/posts.js'
 import friendshipsRoutes from './routes/friendships.js'
 import notificationsRoutes from './routes/notifications.js'
 import checkInsRoutes from './routes/checkIns.js'
+import encyclopediaRoutes from './routes/encyclopedia.js'
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url)
@@ -60,6 +61,7 @@ app.use('/api/posts', postsRoutes)
 app.use('/api/friendships', friendshipsRoutes)
 app.use('/api/notifications', notificationsRoutes)
 app.use('/api/check-ins', checkInsRoutes)
+app.use('/api/encyclopedia', encyclopediaRoutes)
 
 /**
  * health

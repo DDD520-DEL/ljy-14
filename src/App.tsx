@@ -10,6 +10,8 @@ import RankingPage from "@/pages/RankingPage";
 import FavoritesPage from "@/pages/FavoritesPage";
 import ProfilePage from "@/pages/ProfilePage";
 import RelationGraphPage from "@/pages/RelationGraphPage";
+import EncyclopediaPage from "@/pages/EncyclopediaPage";
+import EncyclopediaDetailPage from "@/pages/EncyclopediaDetailPage";
 
 export default function App() {
   return (
@@ -25,6 +27,8 @@ export default function App() {
           <Route path="/map" element={<MapPage />} />
           <Route path="/ranking" element={<RankingPage />} />
           <Route path="/relation-graph" element={<RelationGraphPage />} />
+          <Route path="/encyclopedia" element={<EncyclopediaPage />} />
+          <Route path="/encyclopedia/:id" element={<EncyclopediaDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
         <NicknameModal />
