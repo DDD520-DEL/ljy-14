@@ -137,7 +137,7 @@ export const mapApi = {
 
 export const battleApi = {
   getPair: () => request<BattlePair>('/battle/pair'),
-  recordResult: (data: { winnerSongId: number; loserSongId: number; winnerScore?: number; loserScore?: number }) => 
+  recordResult: (data: { winnerSongId: number; loserSongId: number; winnerScore: number; loserScore: number }) => 
     request<{ success: boolean; record: BattleRecord }>('/battle/record', {
       method: 'POST',
       body: JSON.stringify(data),

@@ -71,7 +71,7 @@ interface BattleState {
   battlePair: BattlePair | null;
   fetchBattlePair: () => Promise<void>;
   voteAddict: (songId: number, score: number, userId: number) => Promise<{ success: boolean; message?: string }>;
-  recordBattleResult: (winnerSongId: number, loserSongId: number) => Promise<{ success: boolean; message?: string }>;
+  recordBattleResult: (winnerSongId: number, loserSongId: number, winnerScore: number, loserScore: number) => Promise<{ success: boolean; message?: string }>;
 }
 
 interface MapState {
@@ -371,9 +371,9 @@ export const useBattleStore = create<BattleState>((set, get) => ({
     }
   },
 
-  recordBattleResult: async (winnerSongId, loserSongId) => {
+  recordBattleResult: async (winnerSongId, loserSongId, winnerScore, loserScore) => {
     try {
-      const result = await battleApi.recordResult({ winnerSongId, loserSongId });
+      const result = await battleApi.recordResult({ winnerSongId, loserSongId, winnerScore, loserScore });
       if (result.success) {
         set((state) => {
           if (!state.battlePair) return state;

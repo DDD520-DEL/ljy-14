@@ -35,10 +35,15 @@ export default function BattlePage() {
       if (isSong1) setVotedSong1(true);
       else setVotedSong2(true);
       
-      if (!battleRecorded && battlePair) {
-        const loserSongId = isSong1 ? battlePair.song2.id : battlePair.song1.id;
-        await recordBattleResult(songId, loserSongId);
-        setBattleRecorded(true);
+      if (!battleRecorded) {
+        const currentPair = useBattleStore.getState().battlePair;
+        if (currentPair) {
+          const loserSongId = isSong1 ? currentPair.song2.id : currentPair.song1.id;
+          const winnerScore = isSong1 ? currentPair.song1.addictScore : currentPair.song2.addictScore;
+          const loserScore = isSong1 ? currentPair.song2.addictScore : currentPair.song1.addictScore;
+          await recordBattleResult(songId, loserSongId, winnerScore, loserScore);
+          setBattleRecorded(true);
+        }
       }
       
       setMessage('投票成功！感谢参与！');
