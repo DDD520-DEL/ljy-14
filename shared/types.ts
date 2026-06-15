@@ -1,3 +1,11 @@
+export interface TeamVideo {
+  id: number;
+  title: string;
+  url: string;
+  thumbnail?: string;
+  createdAt: string;
+}
+
 export interface Team {
   id: number;
   name: string;
@@ -17,6 +25,7 @@ export interface Team {
   activityTime: string;
   costumeScore: number;
   costumeVotes: number;
+  videos: TeamVideo[];
   createdAt: string;
 }
 

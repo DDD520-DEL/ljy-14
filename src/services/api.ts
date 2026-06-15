@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -21,6 +21,7 @@ export const teamApi = {
     district?: string;
     style?: string;
     memberCount?: string;
+    hasVideo?: boolean;
     page?: number;
     pageSize?: number;
   }) => {
@@ -28,6 +29,7 @@ export const teamApi = {
     if (filters?.district) params.append('district', filters.district);
     if (filters?.style) params.append('style', filters.style);
     if (filters?.memberCount) params.append('memberCount', filters.memberCount);
+    if (filters?.hasVideo) params.append('hasVideo', 'true');
     if (filters?.page !== undefined) params.append('page', filters.page.toString());
     if (filters?.pageSize !== undefined) params.append('pageSize', filters.pageSize.toString());
     
@@ -65,6 +67,23 @@ export const teamApi = {
       body: formData,
     }).then(res => res.json()) as Promise<ImportResult>;
   },
+
+  addVideo: (teamId: number, data: { title: string; url: string; thumbnail?: string }) => 
+    request<{ success: boolean; video: TeamVideo }>(`/teams/${teamId}/videos`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateVideo: (teamId: number, videoId: number, data: Partial<TeamVideo>) =>
+    request<{ success: boolean; video: TeamVideo }>(`/teams/${teamId}/videos/${videoId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteVideo: (teamId: number, videoId: number) =>
+    request<{ success: boolean; message: string }>(`/teams/${teamId}/videos/${videoId}`, {
+      method: 'DELETE',
+    }),
 };
 
 export const voteApi = {
@@ -107,8 +126,13 @@ export const rankingApi = {
 };
 
 export const mapApi = {
-  getTeams: (district?: string) => 
-    request<Team[]>(`/map/teams${district ? `?district=${district}` : ''}`),
+  getTeams: (district?: string, hasVideo?: boolean) => {
+    const params = new URLSearchParams();
+    if (district) params.append('district', district);
+    if (hasVideo) params.append('hasVideo', 'true');
+    const query = params.toString();
+    return request<Team[]>(`/map/teams${query ? `?${query}` : ''}`);
+  },
 };
 
 export const battleApi = {

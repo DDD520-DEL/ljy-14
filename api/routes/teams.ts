@@ -12,6 +12,10 @@ router.post('/', teamController.createTeam.bind(teamController));
 router.put('/:id', teamController.updateTeam.bind(teamController));
 router.post('/import', teamController.getUploadMiddleware(), teamController.importTeams.bind(teamController));
 
+router.post('/:id/videos', teamController.addVideo.bind(teamController));
+router.put('/:id/videos/:videoId', teamController.updateVideo.bind(teamController));
+router.delete('/:id/videos/:videoId', teamController.removeVideo.bind(teamController));
+
 router.get('/:teamId/songs', songController.getSongsByTeamId.bind(songController));
 router.post('/:teamId/songs', songController.addSong.bind(songController));
 router.delete('/songs/:id', songController.deleteSong.bind(songController));

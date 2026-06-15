@@ -10,17 +10,18 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 
 export class TeamController {
   async getTeams(req: Request, res: Response): Promise<void> {
     try {
-      const { district, style, memberCount, page, pageSize } = req.query;
+      const { district, style, memberCount, page, pageSize, hasVideo } = req.query;
       
       const filters = {
         district: district as string | undefined,
         style: style as string | undefined,
         memberCount: memberCount as string | undefined,
         page: page ? parseInt(page as string) : undefined,
-        pageSize: pageSize ? parseInt(pageSize as string) : undefined
+        pageSize: pageSize ? parseInt(pageSize as string) : undefined,
+        hasVideo: hasVideo === 'true'
       };
 
-      const result = await teamService.getTeams(filters);
+      const result = await teamService.getTeamsWithVideos(filters);
       res.json({
         teams: result.teams,
         total: result.total,
@@ -122,5 +123,65 @@ export class TeamController {
 
   getUploadMiddleware() {
     return upload.single('file');
+  }
+
+  async addVideo(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const { title, url, thumbnail } = req.body;
+      
+      if (!title || !url) {
+        res.status(400).json({ error: '视频标题和链接不能为空' });
+        return;
+      }
+
+      const video = await teamService.addVideo(teamId, { title, url, thumbnail });
+      
+      if (!video) {
+        res.status(404).json({ error: '舞队不存在' });
+        return;
+      }
+      
+      res.json({ success: true, video });
+    } catch (error) {
+      res.status(500).json({ error: '添加视频失败' });
+    }
+  }
+
+  async removeVideo(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const videoId = parseInt(req.params.videoId);
+      
+      const success = await teamService.removeVideo(teamId, videoId);
+      
+      if (!success) {
+        res.status(404).json({ error: '舞队或视频不存在' });
+        return;
+      }
+      
+      res.json({ success: true, message: '删除视频成功' });
+    } catch (error) {
+      res.status(500).json({ error: '删除视频失败' });
+    }
+  }
+
+  async updateVideo(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const videoId = parseInt(req.params.videoId);
+      const { title, url, thumbnail } = req.body;
+      
+      const video = await teamService.updateVideo(teamId, videoId, { title, url, thumbnail });
+      
+      if (!video) {
+        res.status(404).json({ error: '舞队或视频不存在' });
+        return;
+      }
+      
+      res.json({ success: true, video });
+    } catch (error) {
+      res.status(500).json({ error: '更新视频失败' });
+    }
   }
 }

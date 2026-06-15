@@ -1,3 +1,4 @@
+import { Video } from 'lucide-react';
 import { useFilterStore } from '../store/useStore';
 
 const districts = ['朝阳区', '海淀区', '东城区', '西城区', '丰台区', '石景山区', '通州区', '昌平区', '大兴区', '顺义区'];
@@ -10,9 +11,9 @@ const memberCounts = [
 ];
 
 export default function FilterBar() {
-  const { district, style, memberCount, setDistrict, setStyle, setMemberCount, resetFilters } = useFilterStore();
+  const { district, style, memberCount, hasVideo, setDistrict, setStyle, setMemberCount, setHasVideo, resetFilters } = useFilterStore();
 
-  const hasFilters = district || style || memberCount;
+  const hasFilters = district || style || memberCount || hasVideo;
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 animate-slideUp">
@@ -57,6 +58,20 @@ export default function FilterBar() {
               <option key={m.value} value={m.value}>{m.label}</option>
             ))}
           </select>
+        </div>
+
+        <div className="self-end">
+          <button
+            onClick={() => setHasVideo(!hasVideo)}
+            className={`flex items-center space-x-2 px-5 py-2.5 rounded-xl font-medium transition-all hover:scale-105 active:scale-95 ${
+              hasVideo
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'border-2 border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Video className="w-5 h-5" />
+            <span>有视频</span>
+          </button>
         </div>
 
         {hasFilters && (

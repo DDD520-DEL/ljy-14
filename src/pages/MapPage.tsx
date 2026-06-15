@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { MapPin, Users, Music, Clock, Filter, Navigation } from 'lucide-react';
+import { MapPin, Users, Music, Clock, Filter, Navigation, Video } from 'lucide-react';
 import { useMapStore, useFilterStore } from '../store/useStore';
 import { Link, useSearchParams } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
@@ -34,7 +34,7 @@ function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }
 
 export default function MapPage() {
   const { teams, loading, error, fetchTeams } = useMapStore();
-  const { district, setDistrict } = useFilterStore();
+  const { district, setDistrict, hasVideo, setHasVideo } = useFilterStore();
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
   const [searchParams] = useSearchParams();
   const [viewCenter, setViewCenter] = useState<[number, number]>([39.9042, 116.4074]);
@@ -44,8 +44,8 @@ export default function MapPage() {
   const districts = ['朝阳区', '海淀区', '西城区', '东城区', '丰台区', '通州区'];
 
   useEffect(() => {
-    fetchTeams(district || undefined);
-  }, [district]);
+    fetchTeams(district || undefined, hasVideo);
+  }, [district, hasVideo]);
 
   useEffect(() => {
     if (hasLocatedRef.current) return;
@@ -84,7 +84,7 @@ export default function MapPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-6 justify-center">
+        <div className="flex flex-wrap gap-3 mb-4 justify-center">
           <div className="flex items-center space-x-2 text-gray-600">
             <Filter className="w-5 h-5" />
             <span className="font-medium">按区域筛选：</span>
@@ -112,6 +112,20 @@ export default function MapPage() {
               {d}
             </button>
           ))}
+        </div>
+
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={() => setHasVideo(!hasVideo)}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-full font-medium transition-all duration-300 hover:scale-105 active:scale-95 ${
+              hasVideo
+                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                : 'bg-white text-gray-600 hover:bg-purple-50 border-2 border-gray-200'
+            }`}
+          >
+            <Video className="w-5 h-5" />
+            <span>仅显示有视频的舞队</span>
+          </button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">

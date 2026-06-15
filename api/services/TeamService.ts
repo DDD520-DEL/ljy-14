@@ -1,5 +1,5 @@
 import { TeamRepository } from '../repositories/TeamRepository.js';
-import { Team } from '../../shared/types.js';
+import { Team, TeamVideo } from '../../shared/types.js';
 
 const teamRepository = new TeamRepository();
 
@@ -8,6 +8,7 @@ export class TeamService {
     district?: string;
     style?: string;
     memberCount?: string;
+    hasVideo?: boolean;
     page?: number;
     pageSize?: number;
   }): Promise<{ teams: Team[]; total: number }> {
@@ -34,8 +35,36 @@ export class TeamService {
     return teamRepository.getCostumeRanking(limit);
   }
 
-  async getMapTeams(district?: string): Promise<Team[]> {
-    const { teams } = await teamRepository.findAll({ district });
+  async getMapTeams(district?: string, hasVideo?: boolean): Promise<Team[]> {
+    const { teams } = await teamRepository.findAll({ district, hasVideo });
     return teams;
+  }
+
+  async addVideo(teamId: number, video: Omit<TeamVideo, 'id' | 'createdAt'>): Promise<TeamVideo | undefined> {
+    return teamRepository.addVideo(teamId, video);
+  }
+
+  async removeVideo(teamId: number, videoId: number): Promise<boolean> {
+    return teamRepository.removeVideo(teamId, videoId);
+  }
+
+  async updateVideo(teamId: number, videoId: number, data: Partial<TeamVideo>): Promise<TeamVideo | undefined> {
+    return teamRepository.updateVideo(teamId, videoId, data);
+  }
+
+  async getTeamsWithVideos(filters?: {
+    district?: string;
+    style?: string;
+    memberCount?: string;
+    hasVideo?: boolean;
+  }): Promise<{ teams: Team[]; total: number }> {
+    const result = await teamRepository.findAll(filters);
+    let teams = result.teams;
+    
+    if (filters?.hasVideo) {
+      teams = teams.filter(t => t.videos && t.videos.length > 0);
+    }
+    
+    return { teams, total: teams.length };
   }
 }

@@ -1,11 +1,12 @@
 import { db, saveDatabase } from '../db/database.js';
-import { Team } from '../../shared/types.js';
+import { Team, TeamVideo } from '../../shared/types.js';
 
 export class TeamRepository {
   async findAll(filters?: {
     district?: string;
     style?: string;
     memberCount?: string;
+    hasVideo?: boolean;
     page?: number;
     pageSize?: number;
   }): Promise<{ teams: Team[]; total: number }> {
@@ -25,6 +26,9 @@ export class TeamRepository {
       } else {
         teams = teams.filter(t => t.memberCount >= min);
       }
+    }
+    if (filters?.hasVideo) {
+      teams = teams.filter(t => t.videos && t.videos.length > 0);
     }
 
     const total = teams.length;
@@ -47,18 +51,64 @@ export class TeamRepository {
     return db.data.teams.find(t => t.name === name);
   }
 
-  async create(team: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes'>): Promise<Team> {
+  async create(team: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes' | 'videos'>): Promise<Team> {
     await db.read();
     const newTeam: Team = {
       ...team,
       id: Math.max(0, ...db.data.teams.map(t => t.id)) + 1,
       costumeScore: 0,
       costumeVotes: 0,
+      videos: [],
       createdAt: new Date().toISOString()
     };
     db.data.teams.push(newTeam);
     await saveDatabase();
     return newTeam;
+  }
+
+  async addVideo(teamId: number, video: Omit<TeamVideo, 'id' | 'createdAt'>): Promise<TeamVideo | undefined> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team) return undefined;
+    
+    if (!team.videos) {
+      team.videos = [];
+    }
+    
+    const newVideo: TeamVideo = {
+      ...video,
+      id: Math.max(0, ...team.videos.map(v => v.id), 0) + 1,
+      createdAt: new Date().toISOString()
+    };
+    team.videos.push(newVideo);
+    await saveDatabase();
+    return newVideo;
+  }
+
+  async removeVideo(teamId: number, videoId: number): Promise<boolean> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team || !team.videos) return false;
+    
+    const index = team.videos.findIndex(v => v.id === videoId);
+    if (index === -1) return false;
+    
+    team.videos.splice(index, 1);
+    await saveDatabase();
+    return true;
+  }
+
+  async updateVideo(teamId: number, videoId: number, data: Partial<TeamVideo>): Promise<TeamVideo | undefined> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team || !team.videos) return undefined;
+    
+    const video = team.videos.find(v => v.id === videoId);
+    if (!video) return undefined;
+    
+    Object.assign(video, data);
+    await saveDatabase();
+    return video;
   }
 
   async update(id: number, data: Partial<Team>): Promise<Team | undefined> {

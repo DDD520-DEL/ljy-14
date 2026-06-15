@@ -1,4 +1,31 @@
-import { Team, Song, TeamComment, TeamPost } from '../../shared/types.js';
+import { Team, Song, TeamComment, TeamPost, TeamVideo } from '../../shared/types.js';
+
+const generateVideos = (teamId: number, count: number = 2): TeamVideo[] => {
+  const videoTitles = [
+    '最新表演《最炫民族风》',
+    '红扇舞经典演绎',
+    '春节联欢会表演',
+    '社区文化节演出',
+    '重阳节特别节目',
+    '教学视频：基础动作',
+    '队形变换展示',
+    '广场实拍完整版'
+  ];
+  const videoUrls = [
+    'https://www.youtube.com/embed/dQw4w9WgXcQ',
+    'https://www.bilibili.com/video/BV1xx411c7mD',
+    'https://www.kuaishou.com/short-video/3x6k6z7y8a9b0c1',
+    'https://www.douyin.com/video/7234567890123456789'
+  ];
+  
+  return Array.from({ length: count }, (_, i) => ({
+    id: teamId * 10 + i + 1,
+    title: videoTitles[(teamId + i) % videoTitles.length],
+    url: videoUrls[(teamId + i) % videoUrls.length],
+    thumbnail: `https://picsum.photos/seed/video${teamId}-${i}/480/270`,
+    createdAt: new Date(2024, 4 + i, 15 + i * 3).toISOString()
+  }));
+};
 
 export const mockTeams: Team[] = [
   {
@@ -20,6 +47,7 @@ export const mockTeams: Team[] = [
     activityTime: '每天 06:30-08:00, 19:00-20:30',
     costumeScore: 4.5,
     costumeVotes: 128,
+    videos: generateVideos(1, 3),
     createdAt: '2024-01-15T10:30:00Z'
   },
   {
@@ -41,6 +69,7 @@ export const mockTeams: Team[] = [
     activityTime: '周一至周五 18:30-20:00, 周末 09:00-11:00',
     costumeScore: 4.7,
     costumeVotes: 156,
+    videos: generateVideos(2, 2),
     createdAt: '2024-02-10T08:20:00Z'
   },
   {
@@ -62,6 +91,7 @@ export const mockTeams: Team[] = [
     activityTime: '每天 07:00-08:30, 19:30-21:00',
     costumeScore: 4.8,
     costumeVotes: 203,
+    videos: generateVideos(3, 4),
     createdAt: '2024-01-20T14:45:00Z'
   },
   {
@@ -83,6 +113,7 @@ export const mockTeams: Team[] = [
     activityTime: '每天 06:00-07:30, 18:00-19:30',
     costumeScore: 4.2,
     costumeVotes: 98,
+    videos: generateVideos(4, 2),
     createdAt: '2024-03-05T09:15:00Z'
   },
   {
@@ -104,6 +135,7 @@ export const mockTeams: Team[] = [
     activityTime: '周二、四、六 19:00-21:00',
     costumeScore: 4.6,
     costumeVotes: 167,
+    videos: generateVideos(5, 3),
     createdAt: '2024-02-28T16:30:00Z'
   },
   {
@@ -125,6 +157,7 @@ export const mockTeams: Team[] = [
     activityTime: '每天 06:30-08:00, 19:00-20:30',
     costumeScore: 4.4,
     costumeVotes: 112,
+    videos: generateVideos(6, 2),
     createdAt: '2024-01-08T11:20:00Z'
   },
   {
@@ -146,6 +179,7 @@ export const mockTeams: Team[] = [
     activityTime: '周三、五、日 18:30-20:30',
     costumeScore: 4.3,
     costumeVotes: 89,
+    videos: generateVideos(7, 3),
     createdAt: '2024-03-12T13:40:00Z'
   },
   {
@@ -167,6 +201,7 @@ export const mockTeams: Team[] = [
     activityTime: '周一、三、五 07:00-08:30, 周六 15:00-17:00',
     costumeScore: 4.9,
     costumeVotes: 245,
+    videos: generateVideos(8, 4),
     createdAt: '2024-02-15T10:00:00Z'
   },
   {
@@ -188,6 +223,7 @@ export const mockTeams: Team[] = [
     activityTime: '每天 06:00-07:30, 18:30-20:00',
     costumeScore: 4.5,
     costumeVotes: 134,
+    videos: generateVideos(9, 2),
     createdAt: '2024-01-25T09:30:00Z'
   },
   {
@@ -209,6 +245,7 @@ export const mockTeams: Team[] = [
     activityTime: '周二、四、六 19:00-21:00',
     costumeScore: 4.7,
     costumeVotes: 178,
+    videos: generateVideos(10, 3),
     createdAt: '2024-03-01T14:15:00Z'
   }
 ];

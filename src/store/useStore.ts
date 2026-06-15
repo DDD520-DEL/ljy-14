@@ -7,9 +7,11 @@ interface FilterState {
   district: string;
   style: string;
   memberCount: string;
+  hasVideo: boolean;
   setDistrict: (district: string) => void;
   setStyle: (style: string) => void;
   setMemberCount: (count: string) => void;
+  setHasVideo: (hasVideo: boolean) => void;
   resetFilters: () => void;
 }
 
@@ -26,7 +28,7 @@ interface TeamState {
   completedInvitations: InvitationWithTeamNames[];
   invitationsLoading: boolean;
   invitationsError: string | null;
-  fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string }) => Promise<void>;
+  fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string; hasVideo?: boolean }) => Promise<void>;
   fetchTeamById: (id: number) => Promise<void>;
   fetchTeamSongs: (teamId: number) => Promise<void>;
   fetchTeamComments: (teamId: number) => Promise<void>;
@@ -73,7 +75,7 @@ interface MapState {
   teams: Team[];
   loading: boolean;
   error: string | null;
-  fetchTeams: (district?: string) => Promise<void>;
+  fetchTeams: (district?: string, hasVideo?: boolean) => Promise<void>;
 }
 
 interface PostState {
@@ -92,10 +94,12 @@ export const useFilterStore = create<FilterState>((set) => ({
   district: '',
   style: '',
   memberCount: '',
+  hasVideo: false,
   setDistrict: (district) => set({ district }),
   setStyle: (style) => set({ style }),
   setMemberCount: (memberCount) => set({ memberCount }),
-  resetFilters: () => set({ district: '', style: '', memberCount: '' }),
+  setHasVideo: (hasVideo) => set({ hasVideo }),
+  resetFilters: () => set({ district: '', style: '', memberCount: '', hasVideo: false }),
 }));
 
 export const useTeamStore = create<TeamState>((set) => ({
@@ -360,10 +364,10 @@ export const useMapStore = create<MapState>((set) => ({
   loading: false,
   error: null,
   
-  fetchTeams: async (district) => {
+  fetchTeams: async (district, hasVideo) => {
     set({ loading: true, error: null });
     try {
-      const data = await mapApi.getTeams(district);
+      const data = await mapApi.getTeams(district, hasVideo);
       set({ teams: data, loading: false });
     } catch (error) {
       set({ error: '获取地图舞队失败', loading: false });

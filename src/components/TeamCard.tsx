@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, Users, Star, Music, Heart } from 'lucide-react';
+import { MapPin, Users, Star, Music, Heart, Video } from 'lucide-react';
 import { Team } from '../../shared/types';
 import { useFavoriteStore } from '../store/useStore';
 
@@ -61,6 +61,12 @@ export default function TeamCard({ team, delay = 0 }: TeamCardProps) {
           >
             <Heart className={`w-5 h-5 ${favorited ? 'fill-current' : ''}`} />
           </button>
+          {team.videos && team.videos.length > 0 && (
+            <span className="flex items-center space-x-1 px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">
+              <Video className="w-3 h-3" />
+              <span>{team.videos.length}</span>
+            </span>
+          )}
           <span className="px-3 py-1 bg-gradient-to-r from-red-500 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
             {team.style}
           </span>

@@ -7,23 +7,24 @@ import FilterBar from '../components/FilterBar';
 import SongCard from '../components/SongCard';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
+import HotVideosSection from '../components/HotVideosSection';
 
 export default function HomePage() {
   const { teams, fetchTeams } = useTeamStore();
   const { battlePair, fetchBattlePair, voteAddict } = useBattleStore();
   const { comprehensiveRanking, fetchComprehensiveRanking } = useRankingStore();
-  const { district, style, memberCount } = useFilterStore();
+  const { district, style, memberCount, hasVideo } = useFilterStore();
   const { user, setShowNicknameModal } = useUserStore();
   const { posts, loading: postsLoading, fetchPosts } = usePostStore();
   const [heroIndex, setHeroIndex] = useState(0);
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
-    fetchTeams({ district, style, memberCount });
+    fetchTeams({ district, style, memberCount, hasVideo });
     fetchBattlePair();
     fetchComprehensiveRanking(6);
     fetchPosts();
-  }, [district, style, memberCount]);
+  }, [district, style, memberCount, hasVideo]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -189,6 +190,8 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        <HotVideosSection limit={6} />
 
         {battlePair && (
           <div className="mb-16">

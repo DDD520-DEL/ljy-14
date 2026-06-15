@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings } from 'lucide-react';
 import { useTeamStore, useFavoriteStore, useUserStore } from '../store/useStore';
-import { Song, TeamComment, InvitationWithTeamNames, Team } from '../../shared/types';
+import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo } from '../../shared/types';
 import StarRating from '../components/StarRating';
+import VideoPlayer from '../components/VideoPlayer';
+import VideoCard from '../components/VideoCard';
+import VideoEditModal from '../components/VideoEditModal';
 import { voteApi, teamApi } from '../services/api';
 
 export default function TeamDetailPage() {
@@ -33,8 +36,10 @@ export default function TeamDetailPage() {
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
-  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'invitations'>('songs');
+  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'videos' | 'invitations'>('songs');
   const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
+  const [playingVideo, setPlayingVideo] = useState<TeamVideo | null>(null);
+  const [showVideoEdit, setShowVideoEdit] = useState(false);
   const [costumeMessage, setCostumeMessage] = useState('');
   const [commentContent, setCommentContent] = useState('');
   const [commentRating, setCommentRating] = useState(0);
@@ -451,6 +456,19 @@ export default function TeamDetailPage() {
                   </span>
                 </button>
                 <button
+                  onClick={() => setActiveTab('videos')}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                    activeTab === 'videos'
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="flex items-center space-x-2">
+                    <Video className="w-5 h-5" />
+                    <span>表演视频 ({selectedTeam?.videos?.length || 0})</span>
+                  </span>
+                </button>
+                <button
                   onClick={() => setActiveTab('invitations')}
                   className={`px-6 py-3 rounded-xl font-bold transition-all ${
                     activeTab === 'invitations'
@@ -542,6 +560,51 @@ export default function TeamDetailPage() {
                       <p className="font-bold text-lg">👗 服装展示</p>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {activeTab === 'videos' && (
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-gray-600">
+                      {selectedTeam?.videos?.length || 0} 个表演视频
+                    </p>
+                    <button
+                      onClick={() => setShowVideoEdit(true)}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                    >
+                      <Settings className="w-4 h-4" />
+                      <span>管理视频</span>
+                    </button>
+                  </div>
+                  
+                  {selectedTeam?.videos && selectedTeam.videos.length > 0 ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {selectedTeam.videos.map((video: TeamVideo, index: number) => (
+                        <VideoCard
+                          key={video.id}
+                          video={video}
+                          team={selectedTeam}
+                          onPlay={setPlayingVideo}
+                          delay={index * 100}
+                          showTeamInfo={false}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-16 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl">
+                      <Video className="w-20 h-20 mx-auto mb-4 text-purple-300" />
+                      <h3 className="text-xl font-bold text-gray-700 mb-2">暂无表演视频</h3>
+                      <p className="text-gray-500 mb-6">该舞队还没有上传表演视频</p>
+                      <button
+                        onClick={() => setShowVideoEdit(true)}
+                        className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-bold hover:shadow-lg transition-all"
+                      >
+                        <Plus className="w-5 h-5" />
+                        <span>添加第一个视频</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -920,6 +983,27 @@ export default function TeamDetailPage() {
           </div>
         </div>
       </div>
+
+      {playingVideo && (
+        <VideoPlayer
+          video={playingVideo}
+          onClose={() => setPlayingVideo(null)}
+        />
+      )}
+
+      {showVideoEdit && selectedTeam && (
+        <VideoEditModal
+          isOpen={showVideoEdit}
+          onClose={() => setShowVideoEdit(false)}
+          teamId={selectedTeam.id}
+          videos={selectedTeam.videos || []}
+          onVideosChange={(videos) => {
+            if (selectedTeam) {
+              selectedTeam.videos = videos;
+            }
+          }}
+        />
+      )}
 
       {showInviteModal && selectedTeam && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={handleCloseInviteModal}>
