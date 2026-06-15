@@ -255,6 +255,25 @@ export interface FriendshipResponse {
   message?: string;
 }
 
+export interface UserFavorite {
+  id: number;
+  userId: number;
+  teamId: number;
+  createdAt: string;
+}
+
+export interface Notification {
+  id: number;
+  userId: number;
+  teamId: number;
+  teamName: string;
+  teamAvatar: string;
+  songId: number;
+  songTitle: string;
+  read: boolean;
+  createdAt: string;
+}
+
 export interface TeamImportRow {
   name: string;
   leader: string;

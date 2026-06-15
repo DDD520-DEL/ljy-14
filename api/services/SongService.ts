@@ -1,9 +1,13 @@
 import { SongRepository } from '../repositories/SongRepository.js';
 import { TeamRepository } from '../repositories/TeamRepository.js';
+import { NotificationService } from '../services/NotificationService.js';
+import { UserFavoriteRepository } from '../repositories/UserFavoriteRepository.js';
 import { Song, BattlePair } from '../../shared/types.js';
 
 const songRepository = new SongRepository();
 const teamRepository = new TeamRepository();
+const notificationService = new NotificationService();
+const userFavoriteRepository = new UserFavoriteRepository();
 
 export class SongService {
   async getSongsByTeamId(teamId: number): Promise<Song[]> {
@@ -11,7 +15,24 @@ export class SongService {
   }
 
   async addSong(teamId: number, song: Omit<Song, 'id' | 'teamId' | 'createdAt' | 'addictScore' | 'addictVotes'>): Promise<Song> {
-    return songRepository.create({ ...song, teamId });
+    const newSong = await songRepository.create({ ...song, teamId });
+
+    const team = await teamRepository.findById(teamId);
+    if (team) {
+      const followerUserIds = await userFavoriteRepository.findFollowerUserIds(teamId);
+      if (followerUserIds.length > 0) {
+        await notificationService.notifyFollowers(
+          teamId,
+          team.name,
+          team.avatar,
+          newSong.id,
+          newSong.title,
+          followerUserIds
+        );
+      }
+    }
+
+    return newSong;
   }
 
   async deleteSong(id: number): Promise<boolean> {

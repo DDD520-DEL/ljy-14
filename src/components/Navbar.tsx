@@ -1,13 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2 } from 'lucide-react';
 import { useFavoriteStore, useUserStore } from '../store/useStore';
+import NotificationCenter from './NotificationCenter';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const { favoriteIds } = useFavoriteStore();
+  const { favoriteIds, syncToServer } = useFavoriteStore();
   const { user, setShowNicknameModal } = useUserStore();
+
+  useEffect(() => {
+    if (user) {
+      syncToServer(user.id);
+    }
+  }, [user, syncToServer]);
 
   const navLinks = [
     { path: '/', label: '首页', icon: Music },
@@ -56,7 +63,8 @@ export default function Navbar() {
                 )}
               </Link>
             ))}
-            <div className="ml-2">
+            <div className="ml-2 flex items-center space-x-2">
+              <NotificationCenter />
               {user ? (
                 <Link
                   to="/profile"
@@ -120,7 +128,8 @@ export default function Navbar() {
                   )}
                 </Link>
               ))}
-              <div className="border-t border-gray-100 pt-2 mt-2">
+              <div className="border-t border-gray-100 pt-2 mt-2 flex items-center justify-between px-4">
+                <NotificationCenter />
                 {user ? (
                   <Link
                     to="/profile"

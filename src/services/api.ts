@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -228,5 +228,41 @@ export const friendshipApi = {
   deleteFriendship: (id: number) =>
     request<{ success: boolean; message?: string }>(`/friendships/${id}`, {
       method: 'DELETE',
+    }),
+};
+
+export const notificationApi = {
+  getNotifications: (userId: number) =>
+    request<{ notifications: Notification[] }>(`/notifications/${userId}`),
+
+  getUnreadCount: (userId: number) =>
+    request<{ count: number }>(`/notifications/${userId}/unread-count`),
+
+  markAsRead: (id: number, userId: number) =>
+    request<{ success: boolean }>(`/notifications/${id}/read`, {
+      method: 'PUT',
+      body: JSON.stringify({ userId }),
+    }),
+
+  markAllAsRead: (userId: number) =>
+    request<{ success: boolean; count: number }>(`/notifications/${userId}/read-all`, {
+      method: 'PUT',
+    }),
+};
+
+export const favoriteApi = {
+  getFavoriteTeamIds: (userId: number) =>
+    request<{ teamIds: number[] }>(`/users/${userId}/favorites`),
+
+  syncFavorites: (userId: number, teamIds: number[]) =>
+    request<{ success: boolean }>(`/users/${userId}/favorites/sync`, {
+      method: 'POST',
+      body: JSON.stringify({ teamIds }),
+    }),
+
+  toggleFavorite: (userId: number, teamId: number) =>
+    request<{ success: boolean; favorited: boolean }>(`/users/${userId}/favorites/toggle`, {
+      method: 'POST',
+      body: JSON.stringify({ teamId }),
     }),
 };

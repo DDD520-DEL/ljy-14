@@ -369,7 +369,7 @@ export default function TeamDetailPage() {
                     <span>发起约舞</span>
                   </button>
                   <button
-                    onClick={() => toggleFavorite(selectedTeam.id)}
+                    onClick={() => toggleFavorite(selectedTeam.id, user?.id)}
                     className={`flex items-center space-x-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all duration-300 ${
                       isFavorite(selectedTeam.id)
                         ? 'bg-red-500 text-white hover:bg-red-600 scale-105'

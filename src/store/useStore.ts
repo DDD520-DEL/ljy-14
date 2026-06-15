@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -439,25 +439,45 @@ export const useMapStore = create<MapState>((set) => ({
 
 interface FavoriteState {
   favoriteIds: number[];
-  toggleFavorite: (teamId: number) => void;
+  toggleFavorite: (teamId: number, userId?: number) => void;
   isFavorite: (teamId: number) => boolean;
   clearFavorites: () => void;
+  syncToServer: (userId: number) => Promise<void>;
+  loadFromServer: (userId: number) => Promise<void>;
 }
 
 export const useFavoriteStore = create<FavoriteState>()(
   persist(
     (set, get) => ({
       favoriteIds: [],
-      toggleFavorite: (teamId) => {
+      toggleFavorite: (teamId, userId) => {
         const { favoriteIds } = get();
         if (favoriteIds.includes(teamId)) {
           set({ favoriteIds: favoriteIds.filter((id) => id !== teamId) });
         } else {
           set({ favoriteIds: [...favoriteIds, teamId] });
         }
+        if (userId) {
+          favoriteApi.toggleFavorite(userId, teamId).catch(console.error);
+        }
       },
       isFavorite: (teamId) => get().favoriteIds.includes(teamId),
       clearFavorites: () => set({ favoriteIds: [] }),
+      syncToServer: async (userId) => {
+        try {
+          await favoriteApi.syncFavorites(userId, get().favoriteIds);
+        } catch (error) {
+          console.error('同步收藏到服务器失败', error);
+        }
+      },
+      loadFromServer: async (userId) => {
+        try {
+          const result = await favoriteApi.getFavoriteTeamIds(userId);
+          set({ favoriteIds: result.teamIds });
+        } catch (error) {
+          console.error('从服务器加载收藏失败', error);
+        }
+      },
     }),
     {
       name: 'team-favorites',
@@ -648,6 +668,69 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
       return { success: result.success, message: result.message };
     } catch (error) {
       return { success: false, message: '解除友好关系失败' };
+    }
+  },
+}));
+
+interface NotificationState {
+  notifications: Notification[];
+  unreadCount: number;
+  loading: boolean;
+  error: string | null;
+  fetchNotifications: (userId: number) => Promise<void>;
+  fetchUnreadCount: (userId: number) => Promise<void>;
+  markAsRead: (id: number, userId: number) => Promise<void>;
+  markAllAsRead: (userId: number) => Promise<void>;
+}
+
+export const useNotificationStore = create<NotificationState>((set, get) => ({
+  notifications: [],
+  unreadCount: 0,
+  loading: false,
+  error: null,
+
+  fetchNotifications: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await notificationApi.getNotifications(userId);
+      set({ notifications: result.notifications, loading: false });
+    } catch (error) {
+      set({ error: '获取通知列表失败', loading: false });
+    }
+  },
+
+  fetchUnreadCount: async (userId) => {
+    try {
+      const result = await notificationApi.getUnreadCount(userId);
+      set({ unreadCount: result.count });
+    } catch (error) {
+      console.error('获取未读通知数量失败', error);
+    }
+  },
+
+  markAsRead: async (id, userId) => {
+    try {
+      await notificationApi.markAsRead(id, userId);
+      set((state) => ({
+        notifications: state.notifications.map(n =>
+          n.id === id ? { ...n, read: true } : n
+        ),
+        unreadCount: Math.max(0, state.unreadCount - 1),
+      }));
+    } catch (error) {
+      console.error('标记通知已读失败', error);
+    }
+  },
+
+  markAllAsRead: async (userId) => {
+    try {
+      await notificationApi.markAllAsRead(userId);
+      set((state) => ({
+        notifications: state.notifications.map(n => ({ ...n, read: true })),
+        unreadCount: 0,
+      }));
+    } catch (error) {
+      console.error('标记全部已读失败', error);
     }
   },
 }));

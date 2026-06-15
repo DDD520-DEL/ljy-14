@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { MapPin, Users, Star, Music, Heart, Video } from 'lucide-react';
 import { Team } from '../../shared/types';
-import { useFavoriteStore } from '../store/useStore';
+import { useFavoriteStore, useUserStore } from '../store/useStore';
 
 interface TeamCardProps {
   team: Team;
@@ -10,12 +10,13 @@ interface TeamCardProps {
 
 export default function TeamCard({ team, delay = 0 }: TeamCardProps) {
   const { isFavorite, toggleFavorite } = useFavoriteStore();
+  const { user } = useUserStore();
   const favorited = isFavorite(team.id);
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleFavorite(team.id);
+    toggleFavorite(team.id, user?.id);
   };
 
   return (
