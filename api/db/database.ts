@@ -2,6 +2,17 @@ import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
 import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User } from '../../shared/types.js';
 import { mockTeams, mockSongs, mockComments } from './mockData.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dataDir = path.join(__dirname, '..', 'data');
+
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  console.log('Created data directory:', dataDir);
+}
 
 export interface DatabaseSchema {
   teams: Team[];
@@ -12,7 +23,7 @@ export interface DatabaseSchema {
   users: User[];
 }
 
-const file = './data/db.json';
+const file = path.join(dataDir, 'db.json');
 const adapter = new JSONFile<DatabaseSchema>(file);
 
 const defaultData: DatabaseSchema = {

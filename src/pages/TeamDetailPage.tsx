@@ -32,7 +32,7 @@ export default function TeamDetailPage() {
     rejectInvitation
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
-  const { user, setShowNicknameModal } = useUserStore();
+  const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
   const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'invitations'>('songs');
   const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
   const [costumeMessage, setCostumeMessage] = useState('');
@@ -60,8 +60,18 @@ export default function TeamDetailPage() {
     if (teams.length === 0) {
       fetchTeams();
     }
+    if (user) {
+      fetchUserVotes();
+    }
     return () => clearSelectedTeam();
-  }, [id]);
+  }, [id, user]);
+
+  const hasVotedCostume = selectedTeam && user 
+    ? userVotes.some(v => v.type === 'costume' && v.targetId === selectedTeam.id)
+    : false;
+  
+  const hasVotedSong = (songId: number) => 
+    user ? userVotes.some(v => v.type === 'addict' && v.targetId === songId) : false;
 
   const handleCostumeVote = async (score: number) => {
     if (!selectedTeam) return;
@@ -383,10 +393,11 @@ export default function TeamDetailPage() {
                     <p className="text-gray-600 mb-3">觉得他们的服装有创意吗？来评个分吧！</p>
                     <StarRating
                       rating={selectedTeam.costumeScore}
-                      interactive={true}
+                      interactive={!!user && !hasVotedCostume}
                       onVote={handleCostumeVote}
                       size="lg"
                       color="yellow"
+                      hasVoted={hasVotedCostume}
                     />
                     {costumeMessage && (
                       <p className={`text-sm mt-2 ${costumeMessage.includes('成功') ? 'text-green-500' : 'text-red-500'} animate-pulse`}>

@@ -8,19 +8,25 @@ import { VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
 type TabType = 'votes' | 'favorites' | 'comments';
 
 export default function ProfilePage() {
-  const { user, userVotes, userComments, fetchUserVotes, fetchUserComments, logout, setShowNicknameModal } = useUserStore();
+  const { user, userVotes, userComments, fetchUserVotes, fetchUserComments, logout, setShowNicknameModal, loading } = useUserStore();
   const { teams, fetchTeams } = useTeamStore();
   const { favoriteIds } = useFavoriteStore();
   const [activeTab, setActiveTab] = useState<TabType>('votes');
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
     if (user) {
-      fetchUserVotes();
-      fetchUserComments();
+      Promise.all([fetchUserVotes(), fetchUserComments()]).then(() => {
+        if (mounted) setDataLoaded(true);
+      });
+    } else {
+      setDataLoaded(true);
     }
     if (teams.length === 0) {
       fetchTeams();
     }
+    return () => { mounted = false; };
   }, [user]);
 
   const favoriteTeams = teams.filter((team) => favoriteIds.includes(team.id));
@@ -94,15 +100,21 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-3 divide-x divide-gray-100">
             <div className="p-6 text-center">
-              <div className="text-3xl font-bold text-orange-500 mb-1">{userVotes.length}</div>
+              <div className="text-3xl font-bold text-orange-500 mb-1 tabular-nums">
+                {dataLoaded ? String(userVotes.length || 0) : '—'}
+              </div>
               <p className="text-gray-500 text-sm">次投票</p>
             </div>
             <div className="p-6 text-center">
-              <div className="text-3xl font-bold text-red-500 mb-1">{favoriteIds.length}</div>
+              <div className="text-3xl font-bold text-red-500 mb-1 tabular-nums">
+                {String(favoriteIds.length || 0)}
+              </div>
               <p className="text-gray-500 text-sm">个收藏</p>
             </div>
             <div className="p-6 text-center">
-              <div className="text-3xl font-bold text-blue-500 mb-1">{userComments.length}</div>
+              <div className="text-3xl font-bold text-blue-500 mb-1 tabular-nums">
+                {dataLoaded ? String(userComments.length || 0) : '—'}
+              </div>
               <p className="text-gray-500 text-sm">条留言</p>
             </div>
           </div>

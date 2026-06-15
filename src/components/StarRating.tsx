@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Star } from 'lucide-react';
 
 interface StarRatingProps {
@@ -8,11 +8,16 @@ interface StarRatingProps {
   interactive?: boolean;
   size?: 'sm' | 'md' | 'lg';
   color?: string;
+  hasVoted?: boolean;
 }
 
-export default function StarRating({ rating, totalVotes, onVote, interactive = false, size = 'md', color = 'orange' }: StarRatingProps) {
+export default function StarRating({ rating, totalVotes, onVote, interactive = false, size = 'md', color = 'orange', hasVoted = false }: StarRatingProps) {
   const [hoverRating, setHoverRating] = useState(0);
-  const [voted, setVoted] = useState(false);
+  const [voted, setVoted] = useState(hasVoted);
+
+  useEffect(() => {
+    setVoted(hasVoted);
+  }, [hasVoted]);
 
   const sizeClasses = {
     sm: 'w-4 h-4',

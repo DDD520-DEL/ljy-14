@@ -13,10 +13,14 @@ interface SongCardProps {
 }
 
 export default function SongCard({ song, showVote = true, teamName, delay = 0 }: SongCardProps) {
-  const { user, setShowNicknameModal } = useUserStore();
+  const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
   const [localScore, setLocalScore] = useState(song.addictScore);
   const [localVotes, setLocalVotes] = useState(song.addictVotes);
   const [message, setMessage] = useState('');
+
+  const hasVoted = user 
+    ? userVotes.some(v => v.type === 'addict' && v.targetId === song.id)
+    : false;
 
   const handleVote = async (score: number) => {
     if (!user) {
@@ -29,6 +33,7 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
         setLocalScore(result.newScore);
         setLocalVotes(result.totalVotes);
         setMessage(result.message || '');
+        fetchUserVotes();
       } else {
         setMessage(result.message || '');
         setTimeout(() => setMessage(''), 3000);
@@ -89,10 +94,11 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
               <StarRating
                 rating={localScore}
                 totalVotes={localVotes}
-                interactive={showVote}
+                interactive={showVote && !!user && !hasVoted}
                 onVote={handleVote}
                 size="sm"
                 color="red"
+                hasVoted={hasVoted}
               />
               <span className="text-lg font-bold text-red-500">
                 {localScore.toFixed(1)}
