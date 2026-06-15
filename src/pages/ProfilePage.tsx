@@ -1,23 +1,25 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User, Heart, MessageSquare, Star, Music, Shirt, LogOut, ArrowLeft, Calendar } from 'lucide-react';
-import { useUserStore, useTeamStore, useFavoriteStore } from '../store/useStore';
+import { User, Heart, MessageSquare, Star, Music, Shirt, LogOut, Calendar, Flame, Award } from 'lucide-react';
+import { useUserStore, useTeamStore, useFavoriteStore, useCheckInStore } from '../store/useStore';
 import TeamCard from '../components/TeamCard';
-import { VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
+import CheckInCalendar from '../components/CheckInCalendar';
+import { VoteRecordWithDetails, TeamCommentWithTeam, CheckInRecord } from '../../shared/types';
 
-type TabType = 'votes' | 'favorites' | 'comments';
+type TabType = 'votes' | 'favorites' | 'comments' | 'checkins';
 
 export default function ProfilePage() {
-  const { user, userVotes, userComments, fetchUserVotes, fetchUserComments, logout, setShowNicknameModal, loading } = useUserStore();
+  const { user, userVotes, userComments, fetchUserVotes, fetchUserComments, logout, setShowNicknameModal } = useUserStore();
   const { teams, fetchTeams } = useTeamStore();
   const { favoriteIds } = useFavoriteStore();
+  const { records: checkInRecords, status: checkInStatus, fetchRecords: fetchCheckInRecords, fetchStatus: fetchCheckInStatus } = useCheckInStore();
   const [activeTab, setActiveTab] = useState<TabType>('votes');
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     if (user) {
-      Promise.all([fetchUserVotes(), fetchUserComments()]).then(() => {
+      Promise.all([fetchUserVotes(), fetchUserComments(), fetchCheckInRecords(user.id), fetchCheckInStatus(user.id)]).then(() => {
         if (mounted) setDataLoaded(true);
       });
     } else {
@@ -98,7 +100,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 divide-x divide-gray-100">
+          <div className="grid grid-cols-4 divide-x divide-gray-100">
             <div className="p-6 text-center">
               <div className="text-3xl font-bold text-orange-500 mb-1 tabular-nums">
                 {dataLoaded ? String(userVotes.length || 0) : '—'}
@@ -116,6 +118,12 @@ export default function ProfilePage() {
                 {dataLoaded ? String(userComments.length || 0) : '—'}
               </div>
               <p className="text-gray-500 text-sm">条留言</p>
+            </div>
+            <div className="p-6 text-center">
+              <div className="text-3xl font-bold text-green-500 mb-1 tabular-nums">
+                {dataLoaded && checkInStatus ? String(checkInStatus.totalDays || 0) : '—'}
+              </div>
+              <p className="text-gray-500 text-sm">天签到</p>
             </div>
           </div>
         </div>
@@ -158,6 +166,19 @@ export default function ProfilePage() {
             <span className="flex items-center space-x-2">
               <MessageSquare className="w-5 h-5" />
               <span>我的留言</span>
+            </span>
+          </button>
+          <button
+            onClick={() => setActiveTab('checkins')}
+            className={`px-6 py-3 rounded-xl font-bold transition-all ${
+              activeTab === 'checkins'
+                ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
+                : 'bg-white text-gray-600 hover:bg-gray-50 shadow'
+            }`}
+          >
+            <span className="flex items-center space-x-2">
+              <Calendar className="w-5 h-5" />
+              <span>签到记录</span>
             </span>
           </button>
         </div>
@@ -356,6 +377,105 @@ export default function ProfilePage() {
                 </Link>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'checkins' && (
+          <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="md:col-span-1">
+                <CheckInCalendar showCheckInButton={true} />
+              </div>
+
+              <div className="md:col-span-1">
+                <div className="bg-white rounded-2xl shadow-lg p-6 animate-fadeInUp">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                    <Award className="w-6 h-6 text-orange-500" />
+                    <span>签到成就</span>
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center">
+                          <Flame className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-800">连续签到</p>
+                          <p className="text-sm text-gray-500">坚持就是胜利</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-orange-500">
+                          {checkInStatus?.consecutiveDays || 0}
+                        </div>
+                        <div className="text-xs text-gray-400">天</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-xl flex items-center justify-center">
+                          <Calendar className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-800">累计签到</p>
+                          <p className="text-sm text-gray-500">总签到天数</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-blue-500">
+                          {checkInStatus?.totalDays || 0}
+                        </div>
+                        <div className="text-xs text-gray-400">天</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6 mt-6 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+                  <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2">
+                    <Calendar className="w-6 h-6 text-green-500" />
+                    <span>最近签到</span>
+                  </h3>
+                  
+                  {checkInRecords.length > 0 ? (
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {checkInRecords.slice(0, 20).map((record: CheckInRecord, index: number) => (
+                        <div
+                          key={record.id}
+                          className="flex items-center justify-between p-3 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"
+                          style={{ animationDelay: `${index * 30}ms` }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-emerald-500 rounded-lg flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-800">{record.date}</p>
+                              <p className="text-xs text-gray-500">第 {record.consecutiveDays} 天连续签到</p>
+                            </div>
+                          </div>
+                          {index === 0 && checkInStatus?.todayCheckedIn && (
+                            <span className="px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
+                              今天
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <h3 className="text-lg font-bold text-gray-700 mb-2">还没有签到记录</h3>
+                      <p className="text-gray-500">开始你的第一次签到吧！</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

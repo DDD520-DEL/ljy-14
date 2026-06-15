@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Swords, Trophy, Map, Users, Heart, ChevronRight, Sparkles, MessageSquarePlus, Loader2 } from 'lucide-react';
-import { useTeamStore, useBattleStore, useRankingStore, useFilterStore, useUserStore, usePostStore } from '../store/useStore';
+import { Swords, Trophy, Map, Users, Heart, ChevronRight, Sparkles, MessageSquarePlus, Loader2, Calendar, Flame, X } from 'lucide-react';
+import { useTeamStore, useBattleStore, useRankingStore, useFilterStore, useUserStore, usePostStore, useCheckInStore } from '../store/useStore';
 import TeamCard from '../components/TeamCard';
 import FilterBar from '../components/FilterBar';
 import SongCard from '../components/SongCard';
 import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import HotVideosSection from '../components/HotVideosSection';
+import CheckInCalendar from '../components/CheckInCalendar';
 
 export default function HomePage() {
   const { teams, fetchTeams } = useTeamStore();
@@ -16,8 +17,10 @@ export default function HomePage() {
   const { district, style, memberCount, hasVideo } = useFilterStore();
   const { user, setShowNicknameModal } = useUserStore();
   const { posts, loading: postsLoading, fetchPosts } = usePostStore();
+  const { status: checkInStatus, fetchStatus: fetchCheckInStatus } = useCheckInStore();
   const [heroIndex, setHeroIndex] = useState(0);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showCheckInModal, setShowCheckInModal] = useState(false);
 
   useEffect(() => {
     fetchTeams({ district, style, memberCount, hasVideo });
@@ -25,6 +28,12 @@ export default function HomePage() {
     fetchComprehensiveRanking(6);
     fetchPosts();
   }, [district, style, memberCount, hasVideo]);
+
+  useEffect(() => {
+    if (user) {
+      fetchCheckInStatus(user.id);
+    }
+  }, [user]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,6 +48,14 @@ export default function HomePage() {
       return;
     }
     await voteAddict(songId, score, user.id);
+  };
+
+  const handleCheckInClick = () => {
+    if (!user) {
+      setShowNicknameModal(true);
+      return;
+    }
+    setShowCheckInModal(true);
   };
 
   return (
@@ -84,6 +101,26 @@ export default function HomePage() {
                 <Users className="w-6 h-6" />
                 <span>浏览舞队</span>
               </Link>
+              <button
+                onClick={handleCheckInClick}
+                className={`inline-flex items-center space-x-2 px-8 py-4 text-lg font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ${
+                  checkInStatus?.todayCheckedIn
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                    : 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
+                }`}
+              >
+                {checkInStatus?.todayCheckedIn ? (
+                  <>
+                    <Flame className="w-6 h-6 text-yellow-200" />
+                    <span>已签到 {checkInStatus.consecutiveDays}天</span>
+                  </>
+                ) : (
+                  <>
+                    <Calendar className="w-6 h-6" />
+                    <span>每日签到</span>
+                  </>
+                )}
+              </button>
             </div>
 
             {comprehensiveRanking.length > 0 && (
@@ -347,6 +384,20 @@ export default function HomePage() {
       </footer>
 
       <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} />
+
+      {showCheckInModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-md animate-slideUp">
+            <button
+              onClick={() => setShowCheckInModal(false)}
+              className="absolute -top-2 -right-2 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-500 hover:text-gray-700 hover:scale-110 transition-all"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <CheckInCalendar />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -744,6 +744,74 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       }));
     } catch (error) {
       console.error('标记全部已读失败', error);
+    }
+  },
+}));
+
+interface CheckInState {
+  status: CheckInStatus | null;
+  records: CheckInRecord[];
+  monthRecords: CheckInRecord[];
+  loading: boolean;
+  error: string | null;
+  fetchStatus: (userId: number) => Promise<void>;
+  fetchRecords: (userId: number) => Promise<void>;
+  fetchMonthRecords: (userId: number, year: number, month: number) => Promise<void>;
+  doCheckIn: (userId: number) => Promise<{ success: boolean; message?: string }>;
+}
+
+export const useCheckInStore = create<CheckInState>((set, get) => ({
+  status: null,
+  records: [],
+  monthRecords: [],
+  loading: false,
+  error: null,
+
+  fetchStatus: async (userId) => {
+    try {
+      const status = await checkInApi.getStatus(userId);
+      set({ status });
+    } catch (error) {
+      console.error('获取签到状态失败', error);
+    }
+  },
+
+  fetchRecords: async (userId) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await checkInApi.getRecords(userId);
+      set({ records: result.records, loading: false });
+    } catch (error) {
+      set({ error: '获取签到记录失败', loading: false });
+    }
+  },
+
+  fetchMonthRecords: async (userId, year, month) => {
+    try {
+      const result = await checkInApi.getMonthRecords(userId, year, month);
+      set({ monthRecords: result.records });
+    } catch (error) {
+      console.error('获取月度签到记录失败', error);
+    }
+  },
+
+  doCheckIn: async (userId) => {
+    try {
+      const result = await checkInApi.checkIn(userId);
+      if (result.success && result.status) {
+        set((state) => ({
+          status: result.status!,
+          records: result.record
+            ? [result.record!, ...state.records]
+            : state.records,
+          monthRecords: result.record
+            ? [result.record!, ...state.monthRecords]
+            : state.monthRecords,
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '签到失败' };
     }
   },
 }));

@@ -298,3 +298,25 @@ export interface TeamImportRow {
     coverUrl?: string;
   }>;
 }
+
+export interface CheckInRecord {
+  id: number;
+  userId: number;
+  date: string;
+  consecutiveDays: number;
+  createdAt: string;
+}
+
+export interface CheckInStatus {
+  todayCheckedIn: boolean;
+  consecutiveDays: number;
+  totalDays: number;
+  lastCheckInDate: string | null;
+}
+
+export interface CheckInResponse {
+  success: boolean;
+  message?: string;
+  record?: CheckInRecord;
+  status?: CheckInStatus;
+}

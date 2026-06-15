@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -264,5 +264,25 @@ export const favoriteApi = {
     request<{ success: boolean; favorited: boolean }>(`/users/${userId}/favorites/toggle`, {
       method: 'POST',
       body: JSON.stringify({ teamId }),
+    }),
+};
+
+export const checkInApi = {
+  getStatus: (userId: number) =>
+    request<CheckInStatus>(`/check-ins/${userId}/status`),
+
+  getRecords: (userId: number) =>
+    request<{ records: CheckInRecord[] }>(`/check-ins/${userId}/records`),
+
+  getMonthRecords: (userId: number, year: number, month: number) => {
+    const params = new URLSearchParams();
+    params.append('year', year.toString());
+    params.append('month', month.toString());
+    return request<{ records: CheckInRecord[] }>(`/check-ins/${userId}/month?${params.toString()}`);
+  },
+
+  checkIn: (userId: number) =>
+    request<CheckInResponse>(`/check-ins/${userId}/check-in`, {
+      method: 'POST',
     }),
 };
