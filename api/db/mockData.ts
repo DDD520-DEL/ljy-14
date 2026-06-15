@@ -1,4 +1,4 @@
-import { Team, Song, TeamComment } from '../../shared/types.js';
+import { Team, Song, TeamComment, TeamPost } from '../../shared/types.js';
 
 export const mockTeams: Team[] = [
   {
@@ -279,4 +279,113 @@ export const mockComments: TeamComment[] = [
   { id: 13, teamId: 8, nickname: '草原儿女', content: '蒙古舞跳得太正宗了，仿佛看到了大草原！', rating: 5, createdAt: '2024-05-03T15:30:00Z' },
   { id: 14, teamId: 8, nickname: '民族舞爱好者', content: '盅碗舞太惊艳了，服装也特别有民族特色！', rating: 5, createdAt: '2024-05-16T10:45:00Z' },
   { id: 15, teamId: 9, nickname: '老北京', content: '秧歌扭得地道，年味十足！过年表演特别热闹！', rating: 5, createdAt: '2024-05-02T12:00:00Z' },
+];
+
+export const mockPosts: TeamPost[] = [
+  {
+    id: 1,
+    teamId: 1,
+    content: '今天朝阳公园晨练圆满结束！我们学习了新的红扇舞动作，队员们都特别认真。下周六我们还要去参加区里的文艺汇演，大家一起加油！💃',
+    images: [
+      'https://picsum.photos/seed/post1-1/600/400',
+      'https://picsum.photos/seed/post1-2/600/400',
+      'https://picsum.photos/seed/post1-3/600/400'
+    ],
+    parkLat: 39.9339,
+    parkLng: 116.4728,
+    parkName: '朝阳公园',
+    createdAt: '2024-06-14T08:30:00Z'
+  },
+  {
+    id: 2,
+    teamId: 2,
+    content: '新舞《科目三》排练中！年轻的队员们学得特别快，动作整齐划一。下周就要拍正式视频了，期待成品！🔥',
+    images: [
+      'https://picsum.photos/seed/post2-1/600/400',
+      'https://picsum.photos/seed/post2-2/600/400'
+    ],
+    parkLat: 39.9999,
+    parkLng: 116.2755,
+    parkName: '颐和园北广场',
+    createdAt: '2024-06-14T19:45:00Z'
+  },
+  {
+    id: 3,
+    teamId: 3,
+    content: '《春江花月夜》古典舞排练花絮来了~我们的队员身着汉服翩翩起舞，仿佛穿越回了古代。欢迎大家来地坛公园欣赏我们的表演！',
+    images: [
+      'https://picsum.photos/seed/post3-1/600/400'
+    ],
+    parkLat: 39.9467,
+    parkLng: 116.4153,
+    parkName: '地坛公园',
+    createdAt: '2024-06-13T20:15:00Z'
+  },
+  {
+    id: 4,
+    teamId: 8,
+    content: '今天的蒙古舞专场太精彩了！盅碗舞、筷子舞轮番上演，队员们用舞蹈展现了草原儿女的豪情。感谢所有到场的观众朋友们！🏇',
+    images: [
+      'https://picsum.photos/seed/post4-1/600/400',
+      'https://picsum.photos/seed/post4-2/600/400',
+      'https://picsum.photos/seed/post4-3/600/400',
+      'https://picsum.photos/seed/post4-4/600/400'
+    ],
+    parkLat: 40.2228,
+    parkLng: 116.2328,
+    parkName: '昌平公园',
+    createdAt: '2024-06-13T16:30:00Z'
+  },
+  {
+    id: 5,
+    teamId: 5,
+    content: '爵士辣妈队最新排练视频来了！《无价之姐》+《Despacito》串烧，热辣十足！周二、四、六晚19点，丰台花园等你一起来！',
+    images: [
+      'https://picsum.photos/seed/post5-1/600/400',
+      'https://picsum.photos/seed/post5-2/600/400'
+    ],
+    parkLat: 39.8586,
+    parkLng: 116.2869,
+    parkName: '丰台花园',
+    createdAt: '2024-06-12T21:00:00Z'
+  },
+  {
+    id: 6,
+    teamId: 4,
+    content: '今日打卡！健身操《卡路里》完整跳完，全队暴汗！跟着我们跳，这个夏天一起瘦下来！每天早晚6点，月坛公园不见不散~',
+    images: [
+      'https://picsum.photos/seed/post6-1/600/400'
+    ],
+    parkLat: 39.9156,
+    parkLng: 116.3553,
+    parkName: '月坛公园',
+    createdAt: '2024-06-12T07:30:00Z'
+  },
+  {
+    id: 7,
+    teamId: 7,
+    content: '通州区运河文化广场周末活动圆满成功！我们表演了最火的网红舞曲《科目三》《爱你》，引来无数观众围观。感谢大家的支持！❤️',
+    images: [
+      'https://picsum.photos/seed/post7-1/600/400',
+      'https://picsum.photos/seed/post7-2/600/400',
+      'https://picsum.photos/seed/post7-3/600/400'
+    ],
+    parkLat: 39.9167,
+    parkLng: 116.6556,
+    parkName: '运河文化广场',
+    createdAt: '2024-06-11T18:20:00Z'
+  },
+  {
+    id: 8,
+    teamId: 6,
+    content: '夕阳无限好，黄昏更妖娆。我们石景山夕阳红舞队的老伙计们今天精神头十足！跳舞让我们更年轻，更快乐！欢迎退休的朋友们加入我们~',
+    images: [
+      'https://picsum.photos/seed/post8-1/600/400',
+      'https://picsum.photos/seed/post8-2/600/400'
+    ],
+    parkLat: 39.9078,
+    parkLng: 116.2228,
+    parkName: '八角游乐园南广场',
+    createdAt: '2024-06-11T08:00:00Z'
+  }
 ];

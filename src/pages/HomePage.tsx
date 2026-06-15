@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Swords, Trophy, Map, Users, Heart, ChevronRight, Sparkles } from 'lucide-react';
-import { useTeamStore, useBattleStore, useRankingStore, useFilterStore, useUserStore } from '../store/useStore';
+import { Swords, Trophy, Map, Users, Heart, ChevronRight, Sparkles, MessageSquarePlus, Loader2 } from 'lucide-react';
+import { useTeamStore, useBattleStore, useRankingStore, useFilterStore, useUserStore, usePostStore } from '../store/useStore';
 import TeamCard from '../components/TeamCard';
 import FilterBar from '../components/FilterBar';
 import SongCard from '../components/SongCard';
+import PostCard from '../components/PostCard';
+import CreatePostModal from '../components/CreatePostModal';
 
 export default function HomePage() {
   const { teams, fetchTeams } = useTeamStore();
@@ -12,12 +14,15 @@ export default function HomePage() {
   const { comprehensiveRanking, fetchComprehensiveRanking } = useRankingStore();
   const { district, style, memberCount } = useFilterStore();
   const { user, setShowNicknameModal } = useUserStore();
+  const { posts, loading: postsLoading, fetchPosts } = usePostStore();
   const [heroIndex, setHeroIndex] = useState(0);
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
     fetchTeams({ district, style, memberCount });
     fetchBattlePair();
     fetchComprehensiveRanking(6);
+    fetchPosts();
   }, [district, style, memberCount]);
 
   useEffect(() => {
@@ -230,6 +235,48 @@ export default function HomePage() {
           </div>
         )}
 
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                🌟 舞队广场
+              </h2>
+              <p className="text-gray-500 mt-1">看看各舞队的最新动态</p>
+            </div>
+            <button
+              onClick={() => setShowCreatePost(true)}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+            >
+              <MessageSquarePlus className="w-4.5 h-4.5" />
+              <span>发布动态</span>
+            </button>
+          </div>
+
+          {postsLoading ? (
+            <div className="flex items-center justify-center py-20 bg-white rounded-2xl shadow-lg">
+              <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+            </div>
+          ) : posts.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {posts.map((post, index) => (
+                <PostCard key={post.id} post={post} delay={index * 80} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-white rounded-2xl shadow-lg">
+              <div className="text-6xl mb-4">📝</div>
+              <p className="text-gray-500 text-lg mb-4">暂无动态，快来发布第一条吧！</p>
+              <button
+                onClick={() => setShowCreatePost(true)}
+                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all"
+              >
+                <MessageSquarePlus className="w-5 h-5" />
+                <span>立即发布</span>
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-3xl p-8 text-white shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-2">
             <div className="flex items-center space-x-4 mb-6">
@@ -295,6 +342,8 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      <CreatePostModal isOpen={showCreatePost} onClose={() => setShowCreatePost(false)} />
     </div>
   );
 }

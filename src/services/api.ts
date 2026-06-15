@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -143,5 +143,29 @@ export const invitationApi = {
   rejectInvitation: (id: number) =>
     request<InvitationResponse>(`/invitations/${id}/reject`, {
       method: 'PUT',
+    }),
+};
+
+export const postApi = {
+  getPosts: (page?: number, pageSize?: number) => {
+    const params = new URLSearchParams();
+    if (page !== undefined) params.append('page', page.toString());
+    if (pageSize !== undefined) params.append('pageSize', pageSize.toString());
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return request<{ posts: TeamPostWithTeam[]; total: number; page: number; pageSize: number }>(`/posts${query}`);
+  },
+
+  getTeamPosts: (teamId: number) =>
+    request<{ posts: TeamPost[] }>(`/posts/team/${teamId}`),
+
+  createPost: (data: CreatePostRequest) =>
+    request<PostResponse>('/posts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deletePost: (id: number) =>
+    request<{ success: boolean; message?: string }>(`/posts/${id}`, {
+      method: 'DELETE',
     }),
 };

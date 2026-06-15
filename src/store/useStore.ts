@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -74,6 +74,18 @@ interface MapState {
   loading: boolean;
   error: string | null;
   fetchTeams: (district?: string) => Promise<void>;
+}
+
+interface PostState {
+  posts: TeamPostWithTeam[];
+  teamPosts: TeamPost[];
+  loading: boolean;
+  error: string | null;
+  total: number;
+  fetchPosts: (page?: number, pageSize?: number) => Promise<void>;
+  fetchTeamPosts: (teamId: number) => Promise<void>;
+  createPost: (data: CreatePostRequest) => Promise<{ success: boolean; message?: string }>;
+  deletePost: (id: number) => Promise<{ success: boolean; message?: string }>;
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -463,3 +475,57 @@ export const useUserStore = create<UserState>()(
     }
   )
 );
+
+export const usePostStore = create<PostState>((set, get) => ({
+  posts: [],
+  teamPosts: [],
+  loading: false,
+  error: null,
+  total: 0,
+
+  fetchPosts: async (page, pageSize) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await postApi.getPosts(page, pageSize);
+      set({ posts: result.posts, total: result.total, loading: false });
+    } catch (error) {
+      set({ error: '获取动态列表失败', loading: false });
+    }
+  },
+
+  fetchTeamPosts: async (teamId) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await postApi.getTeamPosts(teamId);
+      set({ teamPosts: result.posts, loading: false });
+    } catch (error) {
+      set({ error: '获取舞队动态失败', loading: false });
+    }
+  },
+
+  createPost: async (data) => {
+    try {
+      const result = await postApi.createPost(data);
+      if (result.success && result.post) {
+        await get().fetchPosts();
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '发布动态失败' };
+    }
+  },
+
+  deletePost: async (id) => {
+    try {
+      const result = await postApi.deletePost(id);
+      if (result.success) {
+        set((state) => ({
+          posts: state.posts.filter((p) => p.id !== id),
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '删除动态失败' };
+    }
+  },
+}));

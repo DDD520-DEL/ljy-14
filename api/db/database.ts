@@ -1,7 +1,7 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User } from '../../shared/types.js';
-import { mockTeams, mockSongs, mockComments } from './mockData.js';
+import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost } from '../../shared/types.js';
+import { mockTeams, mockSongs, mockComments, mockPosts } from './mockData.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -21,6 +21,7 @@ export interface DatabaseSchema {
   comments: TeamComment[];
   invitations: DanceInvitation[];
   users: User[];
+  posts: TeamPost[];
 }
 
 const file = path.join(dataDir, 'db.json');
@@ -32,7 +33,8 @@ const defaultData: DatabaseSchema = {
   votes: [],
   comments: [],
   invitations: [],
-  users: []
+  users: [],
+  posts: []
 };
 
 export const db = new Low<DatabaseSchema>(adapter, defaultData);
@@ -116,6 +118,10 @@ export async function initDatabase(): Promise<void> {
     db.data.users = [];
   }
   
+  if (!db.data.posts) {
+    db.data.posts = [];
+  }
+  
   if (!db.data.teams || db.data.teams.length === 0) {
     const mockUsers = generateMockUsers();
     db.data.users = mockUsers;
@@ -123,6 +129,7 @@ export async function initDatabase(): Promise<void> {
     db.data.songs = mockSongs;
     db.data.votes = generateMockVotes(mockSongs, mockUsers.length);
     db.data.comments = mockComments;
+    db.data.posts = mockPosts;
     await db.write();
     console.log('Database initialized with mock data');
   }

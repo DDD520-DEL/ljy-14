@@ -155,3 +155,32 @@ export interface InvitationWithTeamNames extends DanceInvitation {
   fromTeamName: string;
   toTeamName: string;
 }
+
+export interface TeamPost {
+  id: number;
+  teamId: number;
+  content: string;
+  images: string[];
+  parkLat: number;
+  parkLng: number;
+  parkName: string;
+  createdAt: string;
+}
+
+export interface TeamPostWithTeam extends TeamPost {
+  teamName?: string;
+  teamAvatar?: string;
+  teamDistrict?: string;
+}
+
+export interface CreatePostRequest {
+  teamId: number;
+  content: string;
+  images?: string[];
+}
+
+export interface PostResponse {
+  success: boolean;
+  post?: TeamPost;
+  message?: string;
+}

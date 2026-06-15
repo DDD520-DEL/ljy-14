@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { MapPin, Users, Music, Clock, Filter } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapPin, Users, Music, Clock, Filter, Navigation } from 'lucide-react';
 import { useMapStore, useFilterStore } from '../store/useStore';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -15,10 +15,31 @@ const customIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+const highlightedIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [35, 57],
+  iconAnchor: [17, 57],
+  popupAnchor: [1, -45],
+  shadowSize: [57, 57],
+});
+
+function ChangeView({ center, zoom }: { center: [number, number]; zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center, zoom, { duration: 1.2 });
+  }, [center, zoom, map]);
+  return null;
+}
+
 export default function MapPage() {
   const { teams, loading, error, fetchTeams } = useMapStore();
   const { district, setDistrict } = useFilterStore();
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
+  const [searchParams] = useSearchParams();
+  const [viewCenter, setViewCenter] = useState<[number, number]>([39.9042, 116.4074]);
+  const [viewZoom, setViewZoom] = useState(11);
+  const hasLocatedRef = useRef(false);
 
   const districts = ['朝阳区', '海淀区', '西城区', '东城区', '丰台区', '通州区'];
 
@@ -26,7 +47,23 @@ export default function MapPage() {
     fetchTeams(district || undefined);
   }, [district]);
 
-  const center: [number, number] = [39.9042, 116.4074];
+  useEffect(() => {
+    if (hasLocatedRef.current) return;
+
+    const lat = searchParams.get('lat');
+    const lng = searchParams.get('lng');
+    const teamId = searchParams.get('teamId');
+
+    if (lat && lng) {
+      setViewCenter([parseFloat(lat), parseFloat(lng)]);
+      setViewZoom(15);
+      hasLocatedRef.current = true;
+    }
+
+    if (teamId) {
+      setSelectedTeam(parseInt(teamId));
+    }
+  }, [searchParams, teams]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 pt-24 pb-12">
@@ -91,10 +128,11 @@ export default function MapPage() {
                   </div>
                 ) : (
                   <MapContainer
-                    center={center}
-                    zoom={11}
+                    center={viewCenter}
+                    zoom={viewZoom}
                     style={{ height: '100%', width: '100%' }}
                   >
+                    <ChangeView center={viewCenter} zoom={viewZoom} />
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -103,7 +141,7 @@ export default function MapPage() {
                       <Marker
                         key={team.id}
                         position={[team.parkLat, team.parkLng]}
-                        icon={customIcon}
+                        icon={selectedTeam === team.id ? highlightedIcon : customIcon}
                         eventHandlers={{
                           click: () => setSelectedTeam(team.id),
                         }}
@@ -154,6 +192,22 @@ export default function MapPage() {
           </div>
 
           <div className="space-y-4">
+            {selectedTeam && searchParams.get('teamId') && (
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-300 rounded-2xl p-4 flex items-center space-x-3 animate-fadeInUp">
+                <div className="w-10 h-10 rounded-full bg-yellow-400 flex items-center justify-center flex-shrink-0">
+                  <Navigation className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-yellow-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                    已为您导航到目标舞队
+                  </p>
+                  <p className="text-sm text-yellow-700">
+                    {teams.find((t) => t.id === selectedTeam)?.parkName}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-white rounded-2xl shadow-xl p-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center space-x-2" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
                 <Music className="w-6 h-6 text-blue-500" />
