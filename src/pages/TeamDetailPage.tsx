@@ -40,6 +40,7 @@ export default function TeamDetailPage() {
   const [commentRating, setCommentRating] = useState(0);
   const [commentSubmitMessage, setCommentSubmitMessage] = useState('');
   const [commentSubmitted, setCommentSubmitted] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
   
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteFromTeamId, setInviteFromTeamId] = useState<number | ''>('');
@@ -56,6 +57,10 @@ export default function TeamDetailPage() {
       fetchTeamComments(parseInt(id));
       fetchPendingInvitations(parseInt(id));
       fetchCompletedInvitations(parseInt(id));
+      setCommentContent('');
+      setCommentRating(0);
+      setCommentSubmitted(false);
+      setCommentSubmitMessage('');
     }
     if (teams.length === 0) {
       fetchTeams();
@@ -90,9 +95,17 @@ export default function TeamDetailPage() {
   };
 
   const handleCommentRating = (score: number) => {
-    if (!commentSubmitted) {
-      setCommentRating(score);
-    }
+    if (commentSubmitted || !user) return;
+    setCommentRating(score);
+  };
+
+  const handleCommentRatingHover = (score: number) => {
+    if (commentSubmitted || !user) return;
+    setHoverRating(score);
+  };
+
+  const handleCommentRatingLeave = () => {
+    setHoverRating(0);
   };
 
   const handleSubmitComment = async () => {
@@ -777,26 +790,43 @@ export default function TeamDetailPage() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <span className="text-sm text-gray-500 mr-2">打分:</span>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => handleCommentRating(star)}
-                          disabled={commentSubmitted || !user}
-                          className={`${!commentSubmitted && user ? 'cursor-pointer transition-transform hover:scale-125' : 'cursor-default opacity-75'}`}
-                        >
-                          <Star
-                            className={`w-8 h-8 transition-all duration-200 ${
-                              star <= commentRating
-                                ? 'text-yellow-400 fill-current'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        </button>
-                      ))}
-                      {commentRating > 0 && (
-                        <span className="ml-2 text-sm font-medium text-gray-600">
-                          {commentRating} 星
+                      <div className="flex items-center space-x-1">
+                        {[1, 2, 3, 4, 5].map((star) => {
+                          const isActive = star <= (hoverRating || commentRating);
+                          const isClickable = !commentSubmitted && !!user;
+                          return (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => handleCommentRating(star)}
+                              onMouseEnter={() => handleCommentRatingHover(star)}
+                              onMouseLeave={handleCommentRatingLeave}
+                              disabled={!isClickable}
+                              className={`p-1 rounded-lg transition-all duration-200 ${
+                                isClickable
+                                  ? 'cursor-pointer hover:bg-yellow-50 hover:scale-110 active:scale-95'
+                                  : 'cursor-default opacity-60'
+                              }`}
+                            >
+                              <Star
+                                className={`w-7 h-7 transition-all duration-200 ${
+                                  isActive
+                                    ? 'text-yellow-400 fill-current drop-shadow-sm'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {(commentRating > 0 || hoverRating > 0) && (
+                        <span className="ml-2 text-sm font-medium text-gray-600 min-w-[3rem]">
+                          {hoverRating || commentRating} 星
+                        </span>
+                      )}
+                      {!user && (
+                        <span className="ml-2 text-xs text-orange-500 font-medium">
+                          (请先登录)
                         </span>
                       )}
                     </div>
