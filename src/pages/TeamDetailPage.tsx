@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings } from 'lucide-react';
-import { useTeamStore, useFavoriteStore, useUserStore } from '../store/useStore';
-import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo } from '../../shared/types';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2 } from 'lucide-react';
+import { useTeamStore, useFavoriteStore, useUserStore, useFriendshipStore } from '../store/useStore';
+import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import VideoPlayer from '../components/VideoPlayer';
 import VideoCard from '../components/VideoCard';
@@ -38,7 +38,8 @@ export default function TeamDetailPage() {
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
-  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'videos' | 'invitations'>('songs');
+  const { teamFriendships, fetchTeamFriendships, createFriendship, deleteFriendship } = useFriendshipStore();
+  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'videos' | 'invitations' | 'friendships'>('songs');
   const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
   const [playingVideo, setPlayingVideo] = useState<TeamVideo | null>(null);
   const [showVideoEdit, setShowVideoEdit] = useState(false);
@@ -57,6 +58,11 @@ export default function TeamDetailPage() {
   const [inviteSubmitMessage, setInviteSubmitMessage] = useState('');
   const [showFromTeamDropdown, setShowFromTeamDropdown] = useState(false);
 
+  const [showFriendModal, setShowFriendModal] = useState(false);
+  const [friendTargetTeamId, setFriendTargetTeamId] = useState<number | ''>('');
+  const [friendSubmitMessage, setFriendSubmitMessage] = useState('');
+  const [showFriendTeamDropdown, setShowFriendTeamDropdown] = useState(false);
+
   useEffect(() => {
     if (id) {
       fetchTeamById(parseInt(id));
@@ -65,6 +71,7 @@ export default function TeamDetailPage() {
       fetchPendingInvitations(parseInt(id));
       fetchCompletedInvitations(parseInt(id));
       fetchTeamBattleStats(parseInt(id));
+      fetchTeamFriendships(parseInt(id));
       setCommentContent('');
       setCommentRating(0);
       setCommentSubmitted(false);
@@ -207,6 +214,41 @@ export default function TeamDetailPage() {
   const handleRejectInvitation = async (invitationId: number) => {
     if (!selectedTeam) return;
     await rejectInvitation(invitationId, selectedTeam.id);
+  };
+
+  const handleOpenFriendModal = () => {
+    setShowFriendModal(true);
+    setFriendTargetTeamId('');
+    setFriendSubmitMessage('');
+    setShowFriendTeamDropdown(false);
+  };
+
+  const handleCloseFriendModal = () => {
+    setShowFriendModal(false);
+    setShowFriendTeamDropdown(false);
+  };
+
+  const handleSubmitFriendship = async () => {
+    if (!selectedTeam) return;
+    if (friendTargetTeamId === '') {
+      setFriendSubmitMessage('请选择要建立友好关系的舞队');
+      setTimeout(() => setFriendSubmitMessage(''), 3000);
+      return;
+    }
+    const result = await createFriendship({
+      teamId1: selectedTeam.id,
+      teamId2: friendTargetTeamId as number
+    });
+    setFriendSubmitMessage(result.message || '');
+    setTimeout(() => setFriendSubmitMessage(''), 3000);
+    if (result.success) {
+      setTimeout(() => handleCloseFriendModal(), 1000);
+    }
+  };
+
+  const handleDeleteFriendship = async (friendshipId: number) => {
+    if (!selectedTeam) return;
+    await deleteFriendship(friendshipId);
   };
 
   const formatDateTime = (dateString: string) => {
@@ -492,6 +534,19 @@ export default function TeamDetailPage() {
                         {pendingInvitations.length}
                       </span>
                     )}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('friendships')}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                    activeTab === 'friendships'
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="flex items-center space-x-2">
+                    <Link2 className="w-5 h-5" />
+                    <span>友好舞队 ({teamFriendships.length})</span>
                   </span>
                 </button>
               </div>
@@ -861,6 +916,75 @@ export default function TeamDetailPage() {
                   })()}
                 </div>
               )}
+
+              {activeTab === 'friendships' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                      <span className="text-2xl">🤝</span>
+                      <span>友好舞队关系</span>
+                    </h3>
+                    <button
+                      onClick={handleOpenFriendModal}
+                      className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>标记友好舞队</span>
+                    </button>
+                  </div>
+
+                  {teamFriendships.length > 0 ? (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {teamFriendships.map((friendship: TeamFriendshipWithDetails, index: number) => {
+                        const isTeam1 = friendship.teamId1 === selectedTeam?.id;
+                        const friendTeamId = isTeam1 ? friendship.teamId2 : friendship.teamId1;
+                        const friendTeamName = isTeam1 ? friendship.team2Name : friendship.team1Name;
+                        const friendTeamAvatar = isTeam1 ? friendship.team2Avatar : friendship.team1Avatar;
+                        return (
+                          <div
+                            key={friendship.id}
+                            className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-5 border border-green-200 transition-all hover:shadow-md animate-fadeInUp"
+                            style={{ animationDelay: `${index * 50}ms` }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <Link
+                                to={`/teams/${friendTeamId}`}
+                                className="flex items-center space-x-3 hover:bg-green-100 rounded-lg p-2 -m-2 transition-colors"
+                              >
+                                <img
+                                  src={friendTeamAvatar}
+                                  alt={friendTeamName}
+                                  className="w-12 h-12 rounded-full border-2 border-white shadow-md object-cover"
+                                />
+                                <div>
+                                  <p className="font-bold text-gray-800">{friendTeamName}</p>
+                                  <div className="flex items-center space-x-1 text-green-600 text-sm">
+                                    <Link2 className="w-3 h-3" />
+                                    <span>友好舞队</span>
+                                  </div>
+                                </div>
+                              </Link>
+                              <button
+                                onClick={() => handleDeleteFriendship(friendship.id)}
+                                className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                                title="解除友好关系"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <Link2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p>暂无友好舞队关系</p>
+                      <p className="text-sm text-gray-400 mt-1">点击右上角按钮标记友好舞队</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="border-t border-gray-100 pt-8 mt-8">
@@ -1182,6 +1306,109 @@ export default function TeamDetailPage() {
                   >
                     <Send className="w-4 h-4" />
                     <span>发送邀请</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFriendModal && selectedTeam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={handleCloseFriendModal}>
+          <div
+            className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fadeInUp"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+                    <UserPlus className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                      标记友好舞队
+                    </h2>
+                    <p className="text-sm text-gray-500">与 {selectedTeam.name} 建立友好关系</p>
+                  </div>
+                </div>
+                <button
+                  onClick={handleCloseFriendModal}
+                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-6 h-6 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <span className="text-red-500">*</span> 选择友好舞队
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowFriendTeamDropdown(!showFriendTeamDropdown)}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all text-left flex items-center justify-between bg-white"
+                    >
+                      <span className={friendTargetTeamId === '' ? 'text-gray-400' : 'text-gray-800'}>
+                        {friendTargetTeamId === ''
+                          ? '请选择要标记的舞队'
+                          : teams.find(t => t.id === friendTargetTeamId)?.name}
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${showFriendTeamDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+                    {showFriendTeamDropdown && (
+                      <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                        {teams
+                          .filter(t => t.id !== selectedTeam.id && !teamFriendships.some(f => 
+                            (f.teamId1 === t.id || f.teamId2 === t.id)
+                          ))
+                          .map(t => (
+                            <button
+                              key={t.id}
+                              onClick={() => {
+                                setFriendTargetTeamId(t.id);
+                                setShowFriendTeamDropdown(false);
+                              }}
+                              className={`w-full px-4 py-3 text-left hover:bg-green-50 transition-colors ${
+                                friendTargetTeamId === t.id ? 'bg-green-50 text-green-600' : 'text-gray-700'
+                              }`}
+                            >
+                              {t.name}
+                            </button>
+                          ))}
+                        {teams.filter(t => t.id !== selectedTeam.id && !teamFriendships.some(f => 
+                          (f.teamId1 === t.id || f.teamId2 === t.id)
+                        )).length === 0 && (
+                          <div className="px-4 py-3 text-gray-400">暂无可标记的舞队</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center justify-between">
+                {friendSubmitMessage && (
+                  <p className={`text-sm ${friendSubmitMessage.includes('成功') || friendSubmitMessage.includes('友好') ? 'text-green-500' : 'text-red-500'}`}>
+                    {friendSubmitMessage}
+                  </p>
+                )}
+                <div className="flex space-x-3 ml-auto">
+                  <button
+                    onClick={handleCloseFriendModal}
+                    className="px-6 py-3 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all"
+                  >
+                    取消
+                  </button>
+                  <button
+                    onClick={handleSubmitFriendship}
+                    className="flex items-center space-x-2 px-6 py-3 rounded-xl font-bold text-white bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <Link2 className="w-4 h-4" />
+                    <span>确认标记</span>
                   </button>
                 </div>
               </div>

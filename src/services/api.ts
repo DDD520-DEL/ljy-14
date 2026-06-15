@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -208,6 +208,25 @@ export const postApi = {
 
   deletePost: (id: number) =>
     request<{ success: boolean; message?: string }>(`/posts/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+export const friendshipApi = {
+  getAllFriendships: () =>
+    request<TeamFriendshipWithDetails[]>('/friendships'),
+
+  getFriendshipsByTeamId: (teamId: number) =>
+    request<TeamFriendshipWithDetails[]>(`/friendships/team/${teamId}`),
+
+  createFriendship: (data: CreateFriendshipRequest) =>
+    request<FriendshipResponse>('/friendships', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  deleteFriendship: (id: number) =>
+    request<{ success: boolean; message?: string }>(`/friendships/${id}`, {
       method: 'DELETE',
     }),
 };

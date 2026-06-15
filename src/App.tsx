@@ -9,6 +9,7 @@ import MapPage from "@/pages/MapPage";
 import RankingPage from "@/pages/RankingPage";
 import FavoritesPage from "@/pages/FavoritesPage";
 import ProfilePage from "@/pages/ProfilePage";
+import RelationGraphPage from "@/pages/RelationGraphPage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/battle" element={<BattlePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/ranking" element={<RankingPage />} />
+          <Route path="/relation-graph" element={<RelationGraphPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Routes>
         <NicknameModal />

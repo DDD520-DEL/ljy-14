@@ -1,6 +1,6 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost, BattleRecord } from '../../shared/types.js';
+import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost, BattleRecord, TeamFriendship } from '../../shared/types.js';
 import { mockTeams, mockSongs, mockComments, mockPosts } from './mockData.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,6 +23,7 @@ export interface DatabaseSchema {
   users: User[];
   posts: TeamPost[];
   battleRecords: BattleRecord[];
+  friendships: TeamFriendship[];
 }
 
 const file = path.join(dataDir, 'db.json');
@@ -36,7 +37,8 @@ const defaultData: DatabaseSchema = {
   invitations: [],
   users: [],
   posts: [],
-  battleRecords: []
+  battleRecords: [],
+  friendships: []
 };
 
 export const db = new Low<DatabaseSchema>(adapter, defaultData);
@@ -126,6 +128,10 @@ export async function initDatabase(): Promise<void> {
   
   if (!db.data.battleRecords) {
     db.data.battleRecords = [];
+  }
+  
+  if (!db.data.friendships) {
+    db.data.friendships = [];
   }
   
   if (!db.data.teams || db.data.teams.length === 0) {

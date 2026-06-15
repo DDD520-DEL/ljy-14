@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User } from 'lucide-react';
+import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2 } from 'lucide-react';
 import { useFavoriteStore, useUserStore } from '../store/useStore';
 
 export default function Navbar() {
@@ -16,6 +16,7 @@ export default function Navbar() {
     { path: '/battle', label: '歌单PK', icon: Swords },
     { path: '/map', label: '地图分布', icon: Map },
     { path: '/ranking', label: '排行榜', icon: Trophy },
+    { path: '/relation-graph', label: '关系图谱', icon: Link2 },
   ];
 
   const isActive = (path: string) => location.pathname === path;

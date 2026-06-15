@@ -230,6 +230,31 @@ export interface ImportResult {
   }>;
 }
 
+export interface TeamFriendship {
+  id: number;
+  teamId1: number;
+  teamId2: number;
+  createdAt: string;
+}
+
+export interface TeamFriendshipWithDetails extends TeamFriendship {
+  team1Name: string;
+  team1Avatar: string;
+  team2Name: string;
+  team2Avatar: string;
+}
+
+export interface CreateFriendshipRequest {
+  teamId1: number;
+  teamId2: number;
+}
+
+export interface FriendshipResponse {
+  success: boolean;
+  friendship?: TeamFriendship;
+  message?: string;
+}
+
 export interface TeamImportRow {
   name: string;
   leader: string;

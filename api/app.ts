@@ -22,6 +22,7 @@ import commentsRoutes from './routes/comments.js'
 import invitationsRoutes from './routes/invitations.js'
 import usersRoutes from './routes/users.js'
 import postsRoutes from './routes/posts.js'
+import friendshipsRoutes from './routes/friendships.js'
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url)
@@ -54,6 +55,7 @@ app.use('/api', commentsRoutes)
 app.use('/api/invitations', invitationsRoutes)
 app.use('/api/users', usersRoutes)
 app.use('/api/posts', postsRoutes)
+app.use('/api/friendships', friendshipsRoutes)
 
 /**
  * health

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPostWithTeam, TeamPost, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -91,6 +91,18 @@ interface PostState {
   fetchTeamPosts: (teamId: number) => Promise<void>;
   createPost: (data: CreatePostRequest) => Promise<{ success: boolean; message?: string }>;
   deletePost: (id: number) => Promise<{ success: boolean; message?: string }>;
+}
+
+interface FriendshipState {
+  friendships: TeamFriendshipWithDetails[];
+  teamFriendships: TeamFriendshipWithDetails[];
+  allFriendships: TeamFriendshipWithDetails[];
+  loading: boolean;
+  error: string | null;
+  fetchTeamFriendships: (teamId: number) => Promise<void>;
+  fetchAllFriendships: () => Promise<void>;
+  createFriendship: (data: CreateFriendshipRequest) => Promise<{ success: boolean; message?: string }>;
+  deleteFriendship: (id: number) => Promise<{ success: boolean; message?: string }>;
 }
 
 export const useFilterStore = create<FilterState>((set) => ({
@@ -580,6 +592,62 @@ export const usePostStore = create<PostState>((set, get) => ({
       return { success: result.success, message: result.message };
     } catch (error) {
       return { success: false, message: '删除动态失败' };
+    }
+  },
+}));
+
+export const useFriendshipStore = create<FriendshipState>((set, get) => ({
+  friendships: [],
+  teamFriendships: [],
+  allFriendships: [],
+  loading: false,
+  error: null,
+
+  fetchTeamFriendships: async (teamId) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await friendshipApi.getFriendshipsByTeamId(teamId);
+      set({ teamFriendships: data, loading: false });
+    } catch (error) {
+      set({ error: '获取友好关系失败', loading: false });
+    }
+  },
+
+  fetchAllFriendships: async () => {
+    set({ loading: true, error: null });
+    try {
+      const data = await friendshipApi.getAllFriendships();
+      set({ allFriendships: data, loading: false });
+    } catch (error) {
+      set({ error: '获取友好关系图谱失败', loading: false });
+    }
+  },
+
+  createFriendship: async (data) => {
+    try {
+      const result = await friendshipApi.createFriendship(data);
+      if (result.success) {
+        await get().fetchTeamFriendships(data.teamId1);
+        await get().fetchAllFriendships();
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '建立友好关系失败' };
+    }
+  },
+
+  deleteFriendship: async (id) => {
+    try {
+      const result = await friendshipApi.deleteFriendship(id);
+      if (result.success) {
+        set((state) => ({
+          teamFriendships: state.teamFriendships.filter(f => f.id !== id),
+          allFriendships: state.allFriendships.filter(f => f.id !== id),
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '解除友好关系失败' };
     }
   },
 }));
