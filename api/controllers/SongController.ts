@@ -14,6 +14,21 @@ export class SongController {
     }
   }
 
+  async getSongsByIds(req: Request, res: Response): Promise<void> {
+    try {
+      const ids = req.query.ids as string;
+      if (!ids) {
+        res.json([]);
+        return;
+      }
+      const songIds = ids.split(',').map(Number).filter(n => !isNaN(n));
+      const songs = await songService.getSongsByIds(songIds);
+      res.json(songs);
+    } catch (error) {
+      res.status(500).json({ error: '获取歌曲失败' });
+    }
+  }
+
   async addSong(req: Request, res: Response): Promise<void> {
     try {
       const teamId = parseInt(req.params.teamId);

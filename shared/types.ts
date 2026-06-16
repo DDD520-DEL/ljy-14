@@ -321,6 +321,19 @@ export interface CheckInResponse {
   status?: CheckInStatus;
 }
 
+export interface PlaylistSong {
+  songId: number;
+  addedAt: string;
+}
+
+export interface Playlist {
+  id: string;
+  name: string;
+  songs: PlaylistSong[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type EncyclopediaCategory = 'dance_skill' | 'fitness_tip' | 'safety_tip';
 
 export interface EncyclopediaArticle {

@@ -7,6 +7,7 @@ const teamController = new TeamController();
 const songController = new SongController();
 
 router.get('/', teamController.getTeams.bind(teamController));
+router.get('/songs/by-ids', songController.getSongsByIds.bind(songController));
 router.get('/:id', teamController.getTeamById.bind(teamController));
 router.post('/', teamController.createTeam.bind(teamController));
 router.put('/:id', teamController.updateTeam.bind(teamController));

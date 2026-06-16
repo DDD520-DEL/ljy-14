@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2, BookOpen } from 'lucide-react';
-import { useFavoriteStore, useUserStore } from '../store/useStore';
+import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2, BookOpen, ListMusic } from 'lucide-react';
+import { useFavoriteStore, useUserStore, usePlaylistStore } from '../store/useStore';
 import NotificationCenter from './NotificationCenter';
 
 export default function Navbar() {
@@ -9,6 +9,7 @@ export default function Navbar() {
   const location = useLocation();
   const { favoriteIds, syncToServer } = useFavoriteStore();
   const { user, setShowNicknameModal } = useUserStore();
+  const { playlists } = usePlaylistStore();
 
   useEffect(() => {
     if (user) {
@@ -21,6 +22,7 @@ export default function Navbar() {
     { path: '/teams', label: '舞队风采', icon: Users },
     { path: '/encyclopedia', label: '知识百科', icon: BookOpen },
     { path: '/favorites', label: '我的收藏', icon: Heart, badge: favoriteIds.length },
+    { path: '/playlists', label: '我的歌单', icon: ListMusic, badge: playlists.length },
     { path: '/battle', label: '歌单PK', icon: Swords },
     { path: '/map', label: '地图分布', icon: Map },
     { path: '/ranking', label: '排行榜', icon: Trophy },

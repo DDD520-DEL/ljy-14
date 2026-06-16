@@ -12,6 +12,7 @@ import ProfilePage from "@/pages/ProfilePage";
 import RelationGraphPage from "@/pages/RelationGraphPage";
 import EncyclopediaPage from "@/pages/EncyclopediaPage";
 import EncyclopediaDetailPage from "@/pages/EncyclopediaDetailPage";
+import PlaylistPage from "@/pages/PlaylistPage";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
           <Route path="/teams" element={<TeamListPage />} />
           <Route path="/teams/:id" element={<TeamDetailPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/playlists" element={<PlaylistPage />} />
           <Route path="/battle" element={<BattlePage />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/ranking" element={<RankingPage />} />

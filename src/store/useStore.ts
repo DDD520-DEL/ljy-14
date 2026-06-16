@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord } from '../../shared/types';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist } from '../../shared/types';
 import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -815,3 +815,103 @@ export const useCheckInStore = create<CheckInState>((set, get) => ({
     }
   },
 }));
+
+interface PlaylistState {
+  playlists: Playlist[];
+  createPlaylist: (name: string) => string;
+  renamePlaylist: (id: string, newName: string) => void;
+  deletePlaylist: (id: string) => void;
+  addSongToPlaylist: (playlistId: string, songId: number) => void;
+  removeSongFromPlaylist: (playlistId: string, songId: number) => void;
+  reorderPlaylistSongs: (playlistId: string, fromIndex: number, toIndex: number) => void;
+  isSongInPlaylist: (playlistId: string, songId: number) => boolean;
+  getPlaylistsContainingSong: (songId: number) => Playlist[];
+}
+
+export const usePlaylistStore = create<PlaylistState>()(
+  persist(
+    (set, get) => ({
+      playlists: [],
+
+      createPlaylist: (name: string) => {
+        const id = `pl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const now = new Date().toISOString();
+        const playlist: Playlist = {
+          id,
+          name,
+          songs: [],
+          createdAt: now,
+          updatedAt: now,
+        };
+        set((state) => ({ playlists: [...state.playlists, playlist] }));
+        return id;
+      },
+
+      renamePlaylist: (id: string, newName: string) => {
+        set((state) => ({
+          playlists: state.playlists.map((p) =>
+            p.id === id ? { ...p, name: newName, updatedAt: new Date().toISOString() } : p
+          ),
+        }));
+      },
+
+      deletePlaylist: (id: string) => {
+        set((state) => ({
+          playlists: state.playlists.filter((p) => p.id !== id),
+        }));
+      },
+
+      addSongToPlaylist: (playlistId: string, songId: number) => {
+        set((state) => ({
+          playlists: state.playlists.map((p) => {
+            if (p.id !== playlistId) return p;
+            if (p.songs.some((s) => s.songId === songId)) return p;
+            return {
+              ...p,
+              songs: [...p.songs, { songId, addedAt: new Date().toISOString() }],
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+
+      removeSongFromPlaylist: (playlistId: string, songId: number) => {
+        set((state) => ({
+          playlists: state.playlists.map((p) => {
+            if (p.id !== playlistId) return p;
+            return {
+              ...p,
+              songs: p.songs.filter((s) => s.songId !== songId),
+              updatedAt: new Date().toISOString(),
+            };
+          }),
+        }));
+      },
+
+      reorderPlaylistSongs: (playlistId: string, fromIndex: number, toIndex: number) => {
+        set((state) => ({
+          playlists: state.playlists.map((p) => {
+            if (p.id !== playlistId) return p;
+            const newSongs = [...p.songs];
+            const [moved] = newSongs.splice(fromIndex, 1);
+            newSongs.splice(toIndex, 0, moved);
+            return { ...p, songs: newSongs, updatedAt: new Date().toISOString() };
+          }),
+        }));
+      },
+
+      isSongInPlaylist: (playlistId: string, songId: number) => {
+        const playlist = get().playlists.find((p) => p.id === playlistId);
+        return playlist ? playlist.songs.some((s) => s.songId === songId) : false;
+      },
+
+      getPlaylistsContainingSong: (songId: number) => {
+        return get().playlists.filter((p) => p.songs.some((s) => s.songId === songId));
+      },
+    }),
+    {
+      name: 'my-playlists',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

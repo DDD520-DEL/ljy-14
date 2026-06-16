@@ -14,6 +14,10 @@ export class SongService {
     return songRepository.findByTeamId(teamId);
   }
 
+  async getSongsByIds(ids: number[]): Promise<Song[]> {
+    return songRepository.findByIds(ids);
+  }
+
   async addSong(teamId: number, song: Omit<Song, 'id' | 'teamId' | 'createdAt' | 'addictScore' | 'addictVotes'>): Promise<Song> {
     const newSong = await songRepository.create({ ...song, teamId });
 

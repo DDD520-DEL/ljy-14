@@ -39,6 +39,11 @@ export const teamApi = {
   getTeamById: (id: number) => request<Team>(`/teams/${id}`),
   
   getTeamSongs: (teamId: number) => request<Song[]>(`/teams/${teamId}/songs`),
+
+  getSongsByIds: (ids: number[]) => {
+    if (ids.length === 0) return Promise.resolve([]);
+    return request<Song[]>(`/teams/songs/by-ids?ids=${ids.join(',')}`);
+  },
   
   createTeam: (data: Partial<Team>) => request<Team>('/teams', {
     method: 'POST',

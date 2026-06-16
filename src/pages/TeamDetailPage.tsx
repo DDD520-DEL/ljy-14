@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2 } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2, ListPlus } from 'lucide-react';
 import { useTeamStore, useFavoriteStore, useUserStore, useFriendshipStore } from '../store/useStore';
 import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import VideoPlayer from '../components/VideoPlayer';
 import VideoCard from '../components/VideoCard';
 import VideoEditModal from '../components/VideoEditModal';
+import AddToPlaylistModal from '../components/AddToPlaylistModal';
 import { voteApi, teamApi } from '../services/api';
 
 export default function TeamDetailPage() {
@@ -62,6 +63,7 @@ export default function TeamDetailPage() {
   const [friendTargetTeamId, setFriendTargetTeamId] = useState<number | ''>('');
   const [friendSubmitMessage, setFriendSubmitMessage] = useState('');
   const [showFriendTeamDropdown, setShowFriendTeamDropdown] = useState(false);
+  const [playlistModalSongId, setPlaylistModalSongId] = useState<number | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -623,6 +625,13 @@ export default function TeamDetailPage() {
                               <span className="font-bold">上头程度</span>
                             </div>
                             <StarRating rating={song.addictScore} totalVotes={song.addictVotes} size="sm" color="red" />
+                            <button
+                              onClick={() => setPlaylistModalSongId(song.id)}
+                              className="mt-2 inline-flex items-center space-x-1 text-xs text-purple-500 hover:text-purple-700 font-medium"
+                            >
+                              <ListPlus className="w-3.5 h-3.5" />
+                              <span>加入歌单</span>
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -1415,6 +1424,14 @@ export default function TeamDetailPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {playlistModalSongId !== null && (
+        <AddToPlaylistModal
+          songId={playlistModalSongId}
+          isOpen={true}
+          onClose={() => setPlaylistModalSongId(null)}
+        />
       )}
     </div>
   );

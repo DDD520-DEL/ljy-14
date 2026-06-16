@@ -1,9 +1,10 @@
-import { Music, Clock, Heart } from 'lucide-react';
+import { Music, Clock, Heart, ListPlus } from 'lucide-react';
 import { Song } from '../../shared/types';
 import StarRating from './StarRating';
 import { voteApi } from '../services/api';
 import { useState } from 'react';
 import { useUserStore } from '../store/useStore';
+import AddToPlaylistModal from './AddToPlaylistModal';
 
 interface SongCardProps {
   song: Song;
@@ -17,6 +18,7 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
   const [localScore, setLocalScore] = useState(song.addictScore);
   const [localVotes, setLocalVotes] = useState(song.addictVotes);
   const [message, setMessage] = useState('');
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
   const hasVoted = user 
     ? userVotes.some(v => v.type === 'addict' && v.targetId === song.id)
@@ -85,6 +87,13 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
               <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
                 胜率 {getWinRate(song.battleCount, song.battleWins)}
               </span>
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowPlaylistModal(true); }}
+                className="p-1.5 rounded-full hover:bg-purple-100 text-gray-400 hover:text-purple-500 transition-all"
+                title="添加到歌单"
+              >
+                <ListPlus className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -122,6 +131,7 @@ export default function SongCard({ song, showVote = true, teamName, delay = 0 }:
           </div>
         </div>
       </div>
+      <AddToPlaylistModal songId={song.id} isOpen={showPlaylistModal} onClose={() => setShowPlaylistModal(false)} />
     </div>
   );
 }

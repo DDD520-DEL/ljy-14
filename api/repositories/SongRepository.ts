@@ -87,6 +87,11 @@ export class SongRepository {
     return [shuffled[0], shuffled[1]];
   }
 
+  async findByIds(ids: number[]): Promise<Song[]> {
+    await db.read();
+    return db.data.songs.filter(s => ids.includes(s.id));
+  }
+
   async getWeeklyAddictRanking(limit: number = 10): Promise<(Song & { weeklyAddictScore: number; weeklyAddictVotes: number })[]> {
     await db.read();
     const songs = [...db.data.songs];
