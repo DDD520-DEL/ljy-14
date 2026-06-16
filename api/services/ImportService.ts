@@ -235,7 +235,7 @@ export class ImportService {
         }
 
         try {
-          const newTeam: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes' | 'videos'> = {
+          const newTeam: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes' | 'videos' | 'photos'> = {
             name: teamRow.name,
             leader: teamRow.leader,
             phone: teamRow.phone,

@@ -1,5 +1,5 @@
 import { TeamRepository } from '../repositories/TeamRepository.js';
-import { Team, TeamVideo } from '../../shared/types.js';
+import { Team, TeamVideo, TeamPhoto } from '../../shared/types.js';
 
 const teamRepository = new TeamRepository();
 
@@ -50,6 +50,22 @@ export class TeamService {
 
   async updateVideo(teamId: number, videoId: number, data: Partial<TeamVideo>): Promise<TeamVideo | undefined> {
     return teamRepository.updateVideo(teamId, videoId, data);
+  }
+
+  async getPhotos(teamId: number): Promise<TeamPhoto[]> {
+    return teamRepository.getPhotos(teamId);
+  }
+
+  async addPhoto(teamId: number, photo: Omit<TeamPhoto, 'id' | 'createdAt'>): Promise<TeamPhoto | undefined> {
+    return teamRepository.addPhoto(teamId, photo);
+  }
+
+  async removePhoto(teamId: number, photoId: number): Promise<boolean> {
+    return teamRepository.removePhoto(teamId, photoId);
+  }
+
+  async updatePhoto(teamId: number, photoId: number, data: Partial<TeamPhoto>): Promise<TeamPhoto | undefined> {
+    return teamRepository.updatePhoto(teamId, photoId, data);
   }
 
   async getTeamsWithVideos(filters?: {

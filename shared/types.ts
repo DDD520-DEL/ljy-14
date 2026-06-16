@@ -6,6 +6,15 @@ export interface TeamVideo {
   createdAt: string;
 }
 
+export interface TeamPhoto {
+  id: number;
+  url: string;
+  title?: string;
+  description?: string;
+  uploadedBy?: string;
+  createdAt: string;
+}
+
 export interface Team {
   id: number;
   name: string;
@@ -26,6 +35,7 @@ export interface Team {
   costumeScore: number;
   costumeVotes: number;
   videos: TeamVideo[];
+  photos: TeamPhoto[];
   createdAt: string;
 }
 

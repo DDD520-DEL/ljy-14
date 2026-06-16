@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2, ListPlus } from 'lucide-react';
+import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2, ListPlus, Upload } from 'lucide-react';
 import { useTeamStore, useFavoriteStore, useUserStore, useFriendshipStore } from '../store/useStore';
-import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails } from '../../shared/types';
+import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails, TeamPhoto } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import VideoPlayer from '../components/VideoPlayer';
 import VideoCard from '../components/VideoCard';
 import VideoEditModal from '../components/VideoEditModal';
 import AddToPlaylistModal from '../components/AddToPlaylistModal';
+import PhotoGrid from '../components/PhotoGrid';
+import PhotoViewer from '../components/PhotoViewer';
+import PhotoUploadModal from '../components/PhotoUploadModal';
 import { voteApi, teamApi } from '../services/api';
 
 export default function TeamDetailPage() {
@@ -35,7 +38,12 @@ export default function TeamDetailPage() {
     acceptInvitation,
     rejectInvitation,
     teamBattleStats,
-    fetchTeamBattleStats
+    fetchTeamBattleStats,
+    teamPhotos,
+    photosLoading,
+    fetchTeamPhotos,
+    addTeamPhoto,
+    deleteTeamPhoto
   } = useTeamStore();
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
@@ -64,6 +72,9 @@ export default function TeamDetailPage() {
   const [friendSubmitMessage, setFriendSubmitMessage] = useState('');
   const [showFriendTeamDropdown, setShowFriendTeamDropdown] = useState(false);
   const [playlistModalSongId, setPlaylistModalSongId] = useState<number | null>(null);
+  const [viewerOpen, setViewerOpen] = useState(false);
+  const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -74,6 +85,7 @@ export default function TeamDetailPage() {
       fetchCompletedInvitations(parseInt(id));
       fetchTeamBattleStats(parseInt(id));
       fetchTeamFriendships(parseInt(id));
+      fetchTeamPhotos(parseInt(id));
       setCommentContent('');
       setCommentRating(0);
       setCommentSubmitted(false);
@@ -251,6 +263,26 @@ export default function TeamDetailPage() {
   const handleDeleteFriendship = async (friendshipId: number) => {
     if (!selectedTeam) return;
     await deleteFriendship(friendshipId);
+  };
+
+  const handlePhotoClick = (index: number) => {
+    setViewerInitialIndex(index);
+    setViewerOpen(true);
+  };
+
+  const handlePhotoUpload = async (data: { url: string; title?: string; description?: string }) => {
+    if (!selectedTeam || !user) {
+      setShowNicknameModal(true);
+      return { success: false, message: '请先登录' };
+    }
+    return await addTeamPhoto(selectedTeam.id, { ...data, uploadedBy: user.nickname });
+  };
+
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!selectedTeam) return;
+    if (window.confirm('确定要删除这张照片吗？')) {
+      await deleteTeamPhoto(selectedTeam.id, photoId);
+    }
   };
 
   const formatDateTime = (dateString: string) => {
@@ -646,29 +678,58 @@ export default function TeamDetailPage() {
               )}
 
               {activeTab === 'photos' && (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="relative group overflow-hidden rounded-2xl shadow-lg">
-                    <img
-                      src={selectedTeam.groupPhoto}
-                      alt="舞队合影"
-                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <p className="font-bold text-lg">📸 舞队合影</p>
-                    </div>
+                <div>
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-gray-600">
+                      {teamPhotos.length} 张活动照片
+                    </p>
+                    <button
+                      onClick={() => {
+                        if (!user) {
+                          setShowNicknameModal(true);
+                          return;
+                        }
+                        setShowPhotoUpload(true);
+                      }}
+                      className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                    >
+                      <Upload className="w-4 h-4" />
+                      <span>上传照片</span>
+                    </button>
                   </div>
-                  <div className="relative group overflow-hidden rounded-2xl shadow-lg">
-                    <img
-                      src={selectedTeam.costumePhoto}
-                      alt="服装展示"
-                      className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    <div className="absolute bottom-4 left-4 text-white">
-                      <p className="font-bold text-lg">👗 服装展示</p>
+                  
+                  {photosLoading ? (
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-8 w-8 border-4 border-orange-500 border-t-transparent mx-auto"></div>
+                      <p className="text-gray-500 mt-4">加载照片中...</p>
                     </div>
-                  </div>
+                  ) : teamPhotos.length > 0 ? (
+                    <PhotoGrid
+                      photos={teamPhotos}
+                      onPhotoClick={handlePhotoClick}
+                      onDelete={handleDeletePhoto}
+                      showDelete={!!user}
+                    />
+                  ) : (
+                    <div className="text-center py-16 bg-gradient-to-br from-orange-50 to-yellow-50 rounded-2xl">
+                      <Camera className="w-20 h-20 mx-auto mb-4 text-orange-300" />
+                      <h3 className="text-xl font-bold text-gray-700 mb-2">暂无活动照片</h3>
+                      <p className="text-gray-500 mb-6">该舞队还没有上传活动照片</p>
+                      <button
+                        onClick={() => {
+                          if (!user) {
+                            setShowNicknameModal(true);
+                            return;
+                          }
+                          setShowPhotoUpload(true);
+                        }}
+                        className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full font-bold hover:shadow-lg transition-all"
+                      >
+                        <Plus className="w-5 h-5" />
+                        <span>上传第一张照片</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1433,6 +1494,19 @@ export default function TeamDetailPage() {
           onClose={() => setPlaylistModalSongId(null)}
         />
       )}
+
+      <PhotoViewer
+        photos={teamPhotos}
+        initialIndex={viewerInitialIndex}
+        isOpen={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+      />
+
+      <PhotoUploadModal
+        isOpen={showPhotoUpload}
+        onClose={() => setShowPhotoUpload(false)}
+        onUpload={handlePhotoUpload}
+      />
     </div>
   );
 }

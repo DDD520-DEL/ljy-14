@@ -17,6 +17,11 @@ router.post('/:id/videos', teamController.addVideo.bind(teamController));
 router.put('/:id/videos/:videoId', teamController.updateVideo.bind(teamController));
 router.delete('/:id/videos/:videoId', teamController.removeVideo.bind(teamController));
 
+router.get('/:id/photos', teamController.getPhotos.bind(teamController));
+router.post('/:id/photos', teamController.addPhoto.bind(teamController));
+router.put('/:id/photos/:photoId', teamController.updatePhoto.bind(teamController));
+router.delete('/:id/photos/:photoId', teamController.removePhoto.bind(teamController));
+
 router.get('/:teamId/songs', songController.getSongsByTeamId.bind(songController));
 router.post('/:teamId/songs', songController.addSong.bind(songController));
 router.delete('/songs/:id', songController.deleteSong.bind(songController));

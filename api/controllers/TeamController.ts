@@ -184,4 +184,74 @@ export class TeamController {
       res.status(500).json({ error: '更新视频失败' });
     }
   }
+
+  async getPhotos(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const photos = await teamService.getPhotos(teamId);
+      res.json({ photos });
+    } catch (error) {
+      res.status(500).json({ error: '获取照片列表失败' });
+    }
+  }
+
+  async addPhoto(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const { url, title, description, uploadedBy } = req.body;
+      
+      if (!url) {
+        res.status(400).json({ error: '照片链接不能为空' });
+        return;
+      }
+
+      const photo = await teamService.addPhoto(teamId, { url, title, description, uploadedBy });
+      
+      if (!photo) {
+        res.status(404).json({ error: '舞队不存在' });
+        return;
+      }
+      
+      res.json({ success: true, photo });
+    } catch (error) {
+      res.status(500).json({ error: '添加照片失败' });
+    }
+  }
+
+  async removePhoto(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const photoId = parseInt(req.params.photoId);
+      
+      const success = await teamService.removePhoto(teamId, photoId);
+      
+      if (!success) {
+        res.status(404).json({ error: '舞队或照片不存在' });
+        return;
+      }
+      
+      res.json({ success: true, message: '删除照片成功' });
+    } catch (error) {
+      res.status(500).json({ error: '删除照片失败' });
+    }
+  }
+
+  async updatePhoto(req: Request, res: Response): Promise<void> {
+    try {
+      const teamId = parseInt(req.params.id);
+      const photoId = parseInt(req.params.photoId);
+      const { title, description } = req.body;
+      
+      const photo = await teamService.updatePhoto(teamId, photoId, { title, description });
+      
+      if (!photo) {
+        res.status(404).json({ error: '舞队或照片不存在' });
+        return;
+      }
+      
+      res.json({ success: true, photo });
+    } catch (error) {
+      res.status(500).json({ error: '更新照片失败' });
+    }
+  }
 }

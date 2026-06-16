@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, TeamPhoto, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -87,6 +87,26 @@ export const teamApi = {
 
   deleteVideo: (teamId: number, videoId: number) =>
     request<{ success: boolean; message: string }>(`/teams/${teamId}/videos/${videoId}`, {
+      method: 'DELETE',
+    }),
+
+  getPhotos: (teamId: number) =>
+    request<{ photos: TeamPhoto[] }>(`/teams/${teamId}/photos`),
+
+  addPhoto: (teamId: number, data: { url: string; title?: string; description?: string; uploadedBy?: string }) =>
+    request<{ success: boolean; photo: TeamPhoto }>(`/teams/${teamId}/photos`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updatePhoto: (teamId: number, photoId: number, data: Partial<TeamPhoto>) =>
+    request<{ success: boolean; photo: TeamPhoto }>(`/teams/${teamId}/photos/${photoId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deletePhoto: (teamId: number, photoId: number) =>
+    request<{ success: boolean; message: string }>(`/teams/${teamId}/photos/${photoId}`, {
       method: 'DELETE',
     }),
 };

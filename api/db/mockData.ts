@@ -1,4 +1,4 @@
-import { Team, Song, TeamComment, TeamPost, TeamVideo, EncyclopediaArticle, TeamActivity } from '../../shared/types.js';
+import { Team, Song, TeamComment, TeamPost, TeamVideo, TeamPhoto, EncyclopediaArticle, TeamActivity } from '../../shared/types.js';
 
 const generateVideos = (teamId: number, count: number = 2): TeamVideo[] => {
   const videoTitles = [
@@ -27,6 +27,28 @@ const generateVideos = (teamId: number, count: number = 2): TeamVideo[] => {
   }));
 };
 
+const generatePhotos = (teamId: number, count: number = 6): TeamPhoto[] => {
+  const photoTitles = [
+    '活动合影',
+    '表演现场',
+    '排练花絮',
+    '节日特辑',
+    '社区演出',
+    '晨练时光',
+    '比赛精彩瞬间',
+    '服装展示'
+  ];
+  
+  return Array.from({ length: count }, (_, i) => ({
+    id: teamId * 100 + i + 1,
+    url: `https://picsum.photos/seed/team${teamId}-photo${i}/800/600`,
+    title: photoTitles[(teamId + i) % photoTitles.length],
+    description: '',
+    uploadedBy: '管理员',
+    createdAt: new Date(2024, 3 + i, 10 + i * 5).toISOString()
+  }));
+};
+
 export const mockTeams: Team[] = [
   {
     id: 1,
@@ -48,6 +70,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.5,
     costumeVotes: 128,
     videos: generateVideos(1, 3),
+    photos: generatePhotos(1, 8),
     createdAt: '2024-01-15T10:30:00Z'
   },
   {
@@ -70,6 +93,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.7,
     costumeVotes: 156,
     videos: generateVideos(2, 2),
+    photos: generatePhotos(2, 6),
     createdAt: '2024-02-10T08:20:00Z'
   },
   {
@@ -92,6 +116,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.8,
     costumeVotes: 203,
     videos: generateVideos(3, 4),
+    photos: generatePhotos(3, 7),
     createdAt: '2024-01-20T14:45:00Z'
   },
   {
@@ -114,6 +139,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.2,
     costumeVotes: 98,
     videos: generateVideos(4, 2),
+    photos: generatePhotos(4, 5),
     createdAt: '2024-03-05T09:15:00Z'
   },
   {
@@ -136,6 +162,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.6,
     costumeVotes: 167,
     videos: generateVideos(5, 3),
+    photos: generatePhotos(5, 9),
     createdAt: '2024-02-28T16:30:00Z'
   },
   {
@@ -158,6 +185,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.4,
     costumeVotes: 112,
     videos: generateVideos(6, 2),
+    photos: generatePhotos(6, 5),
     createdAt: '2024-01-08T11:20:00Z'
   },
   {
@@ -180,6 +208,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.3,
     costumeVotes: 89,
     videos: generateVideos(7, 3),
+    photos: generatePhotos(7, 6),
     createdAt: '2024-03-12T13:40:00Z'
   },
   {
@@ -202,6 +231,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.9,
     costumeVotes: 245,
     videos: generateVideos(8, 4),
+    photos: generatePhotos(8, 10),
     createdAt: '2024-02-15T10:00:00Z'
   },
   {
@@ -224,6 +254,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.5,
     costumeVotes: 134,
     videos: generateVideos(9, 2),
+    photos: generatePhotos(9, 7),
     createdAt: '2024-01-25T09:30:00Z'
   },
   {
@@ -246,6 +277,7 @@ export const mockTeams: Team[] = [
     costumeScore: 4.7,
     costumeVotes: 178,
     videos: generateVideos(10, 3),
+    photos: generatePhotos(10, 6),
     createdAt: '2024-03-01T14:15:00Z'
   }
 ];

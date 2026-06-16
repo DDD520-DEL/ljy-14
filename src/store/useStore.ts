@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist, ActivityWithTeam } from '../../shared/types';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist, ActivityWithTeam, TeamPhoto } from '../../shared/types';
 import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -29,6 +29,9 @@ interface TeamState {
   invitationsLoading: boolean;
   invitationsError: string | null;
   teamBattleStats: { totalBattles: number; totalWins: number; totalLosses: number; winRate: number } | null;
+  teamPhotos: TeamPhoto[];
+  photosLoading: boolean;
+  photosError: string | null;
   fetchTeams: (filters?: { district?: string; style?: string; memberCount?: string; hasVideo?: boolean }) => Promise<void>;
   fetchTeamById: (id: number) => Promise<void>;
   fetchTeamSongs: (teamId: number) => Promise<void>;
@@ -36,6 +39,9 @@ interface TeamState {
   fetchPendingInvitations: (teamId: number) => Promise<void>;
   fetchCompletedInvitations: (teamId: number) => Promise<void>;
   fetchTeamBattleStats: (teamId: number) => Promise<void>;
+  fetchTeamPhotos: (teamId: number) => Promise<void>;
+  addTeamPhoto: (teamId: number, data: { url: string; title?: string; description?: string; uploadedBy?: string }) => Promise<{ success: boolean; message?: string }>;
+  deleteTeamPhoto: (teamId: number, photoId: number) => Promise<{ success: boolean; message?: string }>;
   createInvitation: (data: CreateInvitationRequest) => Promise<{ success: boolean; message?: string }>;
   acceptInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
   rejectInvitation: (invitationId: number, teamId: number) => Promise<{ success: boolean; message?: string }>;
@@ -131,6 +137,9 @@ export const useTeamStore = create<TeamState>((set) => ({
   invitationsLoading: false,
   invitationsError: null,
   teamBattleStats: null,
+  teamPhotos: [],
+  photosLoading: false,
+  photosError: null,
   
   fetchTeams: async (filters) => {
     set({ loading: true, error: null });
@@ -215,6 +224,44 @@ export const useTeamStore = create<TeamState>((set) => ({
     }
   },
 
+  fetchTeamPhotos: async (teamId) => {
+    set({ photosLoading: true, photosError: null });
+    try {
+      const response = await teamApi.getPhotos(teamId);
+      set({ teamPhotos: response.photos, photosLoading: false });
+    } catch (error) {
+      set({ photosError: '获取照片列表失败', photosLoading: false });
+    }
+  },
+
+  addTeamPhoto: async (teamId, data) => {
+    try {
+      const result = await teamApi.addPhoto(teamId, data);
+      if (result.success && result.photo) {
+        set((state) => ({
+          teamPhotos: [result.photo!, ...state.teamPhotos]
+        }));
+      }
+      return { success: result.success, message: result.photo ? '添加成功' : '添加失败' };
+    } catch (error) {
+      return { success: false, message: '添加照片失败' };
+    }
+  },
+
+  deleteTeamPhoto: async (teamId, photoId) => {
+    try {
+      const result = await teamApi.deletePhoto(teamId, photoId);
+      if (result.success) {
+        set((state) => ({
+          teamPhotos: state.teamPhotos.filter(p => p.id !== photoId)
+        }));
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '删除照片失败' };
+    }
+  },
+
   createInvitation: async (data) => {
     try {
       const result = await invitationApi.createInvitation(data);
@@ -279,7 +326,7 @@ export const useTeamStore = create<TeamState>((set) => ({
     }
   },
   
-  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [], pendingInvitations: [], completedInvitations: [], teamBattleStats: null }),
+  clearSelectedTeam: () => set({ selectedTeam: null, teamSongs: [], teamComments: [], pendingInvitations: [], completedInvitations: [], teamBattleStats: null, teamPhotos: [] }),
 }));
 
 export const useRankingStore = create<RankingState>((set, get) => ({

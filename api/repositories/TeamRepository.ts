@@ -1,5 +1,5 @@
 import { db, saveDatabase } from '../db/database.js';
-import { Team, TeamVideo } from '../../shared/types.js';
+import { Team, TeamVideo, TeamPhoto } from '../../shared/types.js';
 
 export class TeamRepository {
   async findAll(filters?: {
@@ -51,7 +51,7 @@ export class TeamRepository {
     return db.data.teams.find(t => t.name === name);
   }
 
-  async create(team: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes' | 'videos'>): Promise<Team> {
+  async create(team: Omit<Team, 'id' | 'createdAt' | 'costumeScore' | 'costumeVotes' | 'videos' | 'photos'>): Promise<Team> {
     await db.read();
     const newTeam: Team = {
       ...team,
@@ -59,6 +59,7 @@ export class TeamRepository {
       costumeScore: 0,
       costumeVotes: 0,
       videos: [],
+      photos: [],
       createdAt: new Date().toISOString()
     };
     db.data.teams.push(newTeam);
@@ -109,6 +110,58 @@ export class TeamRepository {
     Object.assign(video, data);
     await saveDatabase();
     return video;
+  }
+
+  async getPhotos(teamId: number): Promise<TeamPhoto[]> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team) return [];
+    return team.photos || [];
+  }
+
+  async addPhoto(teamId: number, photo: Omit<TeamPhoto, 'id' | 'createdAt'>): Promise<TeamPhoto | undefined> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team) return undefined;
+    
+    if (!team.photos) {
+      team.photos = [];
+    }
+    
+    const newPhoto: TeamPhoto = {
+      ...photo,
+      id: Math.max(0, ...team.photos.map(p => p.id), 0) + 1,
+      createdAt: new Date().toISOString()
+    };
+    team.photos.unshift(newPhoto);
+    await saveDatabase();
+    return newPhoto;
+  }
+
+  async removePhoto(teamId: number, photoId: number): Promise<boolean> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team || !team.photos) return false;
+    
+    const index = team.photos.findIndex(p => p.id === photoId);
+    if (index === -1) return false;
+    
+    team.photos.splice(index, 1);
+    await saveDatabase();
+    return true;
+  }
+
+  async updatePhoto(teamId: number, photoId: number, data: Partial<TeamPhoto>): Promise<TeamPhoto | undefined> {
+    await db.read();
+    const team = db.data.teams.find(t => t.id === teamId);
+    if (!team || !team.photos) return undefined;
+    
+    const photo = team.photos.find(p => p.id === photoId);
+    if (!photo) return undefined;
+    
+    Object.assign(photo, data);
+    await saveDatabase();
+    return photo;
   }
 
   async update(id: number, data: Partial<Team>): Promise<Team | undefined> {
