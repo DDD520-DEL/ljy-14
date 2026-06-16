@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { MapPin, Users, Calendar, Clock, Star, Heart, ArrowLeft, Camera, Music, MessageSquare, Send, Handshake, CheckCircle, XCircle, Plus, X, ChevronDown, User, Video, Settings, UserPlus, Link2, Trash2, ListPlus, Upload } from 'lucide-react';
-import { useTeamStore, useFavoriteStore, useUserStore, useFriendshipStore } from '../store/useStore';
-import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails, TeamPhoto } from '../../shared/types';
+import { useTeamStore, useFavoriteStore, useUserStore, useFriendshipStore, useRecruitmentStore } from '../store/useStore';
+import { Song, TeamComment, InvitationWithTeamNames, Team, TeamVideo, TeamFriendshipWithDetails, TeamPhoto, Recruitment } from '../../shared/types';
 import StarRating from '../components/StarRating';
 import VideoPlayer from '../components/VideoPlayer';
 import VideoCard from '../components/VideoCard';
@@ -11,6 +11,7 @@ import AddToPlaylistModal from '../components/AddToPlaylistModal';
 import PhotoGrid from '../components/PhotoGrid';
 import PhotoViewer from '../components/PhotoViewer';
 import PhotoUploadModal from '../components/PhotoUploadModal';
+import CreateRecruitmentModal from '../components/CreateRecruitmentModal';
 import { voteApi, teamApi } from '../services/api';
 
 export default function TeamDetailPage() {
@@ -48,7 +49,8 @@ export default function TeamDetailPage() {
   const { isFavorite, toggleFavorite } = useFavoriteStore();
   const { user, setShowNicknameModal, userVotes, fetchUserVotes } = useUserStore();
   const { teamFriendships, fetchTeamFriendships, createFriendship, deleteFriendship } = useFriendshipStore();
-  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'videos' | 'invitations' | 'friendships'>('songs');
+  const { teamRecruitments, fetchTeamRecruitments, closeRecruitment, deleteRecruitment } = useRecruitmentStore();
+  const [activeTab, setActiveTab] = useState<'songs' | 'photos' | 'videos' | 'invitations' | 'friendships' | 'recruitments'>('songs');
   const [invitationTab, setInvitationTab] = useState<'pending' | 'completed'>('pending');
   const [playingVideo, setPlayingVideo] = useState<TeamVideo | null>(null);
   const [showVideoEdit, setShowVideoEdit] = useState(false);
@@ -75,6 +77,7 @@ export default function TeamDetailPage() {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerInitialIndex, setViewerInitialIndex] = useState(0);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [showRecruitmentModal, setShowRecruitmentModal] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -86,6 +89,7 @@ export default function TeamDetailPage() {
       fetchTeamBattleStats(parseInt(id));
       fetchTeamFriendships(parseInt(id));
       fetchTeamPhotos(parseInt(id));
+      fetchTeamRecruitments(parseInt(id));
       setCommentContent('');
       setCommentRating(0);
       setCommentSubmitted(false);
@@ -583,6 +587,19 @@ export default function TeamDetailPage() {
                     <span>友好舞队 ({teamFriendships.length})</span>
                   </span>
                 </button>
+                <button
+                  onClick={() => setActiveTab('recruitments')}
+                  className={`px-6 py-3 rounded-xl font-bold transition-all ${
+                    activeTab === 'recruitments'
+                      ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <span className="flex items-center space-x-2">
+                    <Users className="w-5 h-5" />
+                    <span>招募管理 ({teamRecruitments.length})</span>
+                  </span>
+                </button>
               </div>
 
               {activeTab === 'songs' && (
@@ -1055,6 +1072,118 @@ export default function TeamDetailPage() {
                   )}
                 </div>
               )}
+
+              {activeTab === 'recruitments' && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-800 flex items-center space-x-2">
+                      <span className="text-2xl">📣</span>
+                      <span>招募公告管理</span>
+                    </h3>
+                    <button
+                      onClick={() => setShowRecruitmentModal(true)}
+                      className="flex items-center space-x-2 px-5 py-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>发布招募</span>
+                    </button>
+                  </div>
+
+                  {teamRecruitments.length > 0 ? (
+                    <div className="space-y-4">
+                      {teamRecruitments.map((recruitment: Recruitment, index: number) => (
+                        <div
+                          key={recruitment.id}
+                          className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all animate-fadeInUp"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-2">
+                                <h4 className="text-lg font-bold text-gray-800">{recruitment.title}</h4>
+                                <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                                  recruitment.status === 'active'
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'bg-gray-100 text-gray-500'
+                                }`}>
+                                  {recruitment.status === 'active' ? '招募中' : '已结束'}
+                                </span>
+                              </div>
+                              <p className="text-gray-600 text-sm mb-3">{recruitment.description}</p>
+                              <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                <span className="flex items-center space-x-1">
+                                  <Users className="w-4 h-4" />
+                                  <span>招募 {recruitment.recruitCount} 人</span>
+                                </span>
+                                {(recruitment.minAge || recruitment.maxAge) && (
+                                  <span>年龄: {recruitment.minAge || '不限'} - {recruitment.maxAge || '不限'}岁</span>
+                                )}
+                                {recruitment.gender && recruitment.gender !== 'any' && (
+                                  <span>性别: {recruitment.gender === 'male' ? '男' : '女'}</span>
+                                )}
+                              </div>
+                              <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-4 text-sm">
+                                <span className="text-gray-500">联系人: {recruitment.contactName}</span>
+                                <span className="text-gray-500">电话: {recruitment.contactPhone}</span>
+                                {recruitment.contactWechat && (
+                                  <span className="text-gray-500">微信: {recruitment.contactWechat}</span>
+                                )}
+                              </div>
+                              {recruitment.requirements && (
+                                <div className="mt-3 text-sm">
+                                  <span className="text-gray-700 font-medium">招募要求：</span>
+                                  <span className="text-gray-600">{recruitment.requirements}</span>
+                                </div>
+                              )}
+                              {recruitment.benefits && (
+                                <div className="mt-2 text-sm">
+                                  <span className="text-gray-700 font-medium">福利待遇：</span>
+                                  <span className="text-gray-600">{recruitment.benefits}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col space-y-2 ml-4">
+                              {recruitment.status === 'active' && (
+                                <button
+                                  onClick={async () => {
+                                    if (window.confirm('确定要结束这个招募吗？')) {
+                                      await closeRecruitment(recruitment.id);
+                                      if (id) fetchTeamRecruitments(parseInt(id));
+                                    }
+                                  }}
+                                  className="px-4 py-2 text-sm bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors font-medium"
+                                >
+                                  结束招募
+                                </button>
+                              )}
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('确定要删除这个招募公告吗？')) {
+                                    await deleteRecruitment(recruitment.id);
+                                    if (id) fetchTeamRecruitments(parseInt(id));
+                                  }
+                                }}
+                                className="px-4 py-2 text-sm bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium"
+                              >
+                                删除
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            发布于 {new Date(recruitment.createdAt).toLocaleDateString('zh-CN')}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-500">
+                      <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p>暂无招募公告</p>
+                      <p className="text-sm text-gray-400 mt-1">点击右上角按钮发布招募新队员的公告</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="border-t border-gray-100 pt-8 mt-8">
@@ -1506,6 +1635,12 @@ export default function TeamDetailPage() {
         isOpen={showPhotoUpload}
         onClose={() => setShowPhotoUpload(false)}
         onUpload={handlePhotoUpload}
+      />
+
+      <CreateRecruitmentModal
+        isOpen={showRecruitmentModal}
+        onClose={() => setShowRecruitmentModal(false)}
+        teamId={selectedTeam?.id || 0}
       />
     </div>
   );

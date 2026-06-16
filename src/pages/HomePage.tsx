@@ -10,6 +10,7 @@ import CreatePostModal from '../components/CreatePostModal';
 import HotVideosSection from '../components/HotVideosSection';
 import CheckInCalendar from '../components/CheckInCalendar';
 import ActivityCalendar from '../components/ActivityCalendar';
+import LatestRecruitments from '../components/LatestRecruitments';
 
 export default function HomePage() {
   const { teams, fetchTeams } = useTeamStore();
@@ -203,30 +204,38 @@ export default function HomePage() {
         <FilterBar />
 
         <div className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
-              🔥 热门舞队
-            </h2>
-            <Link
-              to="/teams"
-              className="flex items-center space-x-1 text-orange-600 font-medium hover:text-orange-700 transition-colors"
-            >
-              <span>查看全部</span>
-              <ChevronRight className="w-5 h-5" />
-            </Link>
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="flex-1">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                  🔥 热门舞队
+                </h2>
+                <Link
+                  to="/teams"
+                  className="flex items-center space-x-1 text-orange-600 font-medium hover:text-orange-700 transition-colors"
+                >
+                  <span>查看全部</span>
+                  <ChevronRight className="w-5 h-5" />
+                </Link>
+              </div>
+              
+              {teams.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {teams.slice(0, 4).map((team, index) => (
+                    <TeamCard key={team.id} team={team} delay={index * 100} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-2xl shadow-lg">
+                  <p className="text-gray-500 text-lg">暂无符合条件的舞队</p>
+                </div>
+              )}
+            </div>
+
+            <div className="lg:w-80 flex-shrink-0">
+              <LatestRecruitments limit={5} />
+            </div>
           </div>
-          
-          {teams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.slice(0, 6).map((team, index) => (
-                <TeamCard key={team.id} team={team} delay={index * 100} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-white rounded-2xl shadow-lg">
-              <p className="text-gray-500 text-lg">暂无符合条件的舞队</p>
-            </div>
-          )}
         </div>
 
         <div className="mb-16">

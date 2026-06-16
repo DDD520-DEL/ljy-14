@@ -1,4 +1,4 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, TeamPhoto, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, TeamPhoto, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse, Recruitment, RecruitmentWithTeam, CreateRecruitmentRequest, UpdateRecruitmentRequest, RecruitmentResponse, RecruitmentListResponse } from '../../shared/types';
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -371,4 +371,54 @@ export interface DashboardStats {
 
 export const statsApi = {
   getDashboardStats: () => request<DashboardStats>('/stats/dashboard'),
+};
+
+export const recruitmentApi = {
+  getRecruitments: (filters?: {
+    status?: 'active' | 'closed';
+    teamId?: number;
+    page?: number;
+    pageSize?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.teamId !== undefined) params.append('teamId', filters.teamId.toString());
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
+    if (filters?.pageSize !== undefined) params.append('pageSize', filters.pageSize.toString());
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return request<RecruitmentListResponse>(`/recruitments${query}`);
+  },
+
+  getRecruitmentById: (id: number) =>
+    request<RecruitmentResponse>(`/recruitments/${id}`),
+
+  getTeamRecruitments: (teamId: number) =>
+    request<{ success: boolean; recruitments: Recruitment[] }>(`/recruitments/team/${teamId}`),
+
+  getLatestRecruitments: (limit?: number) => {
+    const query = limit ? `?limit=${limit}` : '';
+    return request<{ success: boolean; recruitments: RecruitmentWithTeam[] }>(`/recruitments/latest${query}`);
+  },
+
+  createRecruitment: (data: CreateRecruitmentRequest) =>
+    request<RecruitmentResponse>('/recruitments', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateRecruitment: (id: number, data: UpdateRecruitmentRequest) =>
+    request<RecruitmentResponse>(`/recruitments/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+
+  deleteRecruitment: (id: number) =>
+    request<{ success: boolean; message?: string }>(`/recruitments/${id}`, {
+      method: 'DELETE',
+    }),
+
+  closeRecruitment: (id: number) =>
+    request<RecruitmentResponse>(`/recruitments/${id}/close`, {
+      method: 'PUT',
+    }),
 };

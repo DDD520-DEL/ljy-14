@@ -1,7 +1,7 @@
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';
-import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost, BattleRecord, TeamFriendship, Notification, UserFavorite, CheckInRecord, EncyclopediaArticle } from '../../shared/types.js';
-import { mockTeams, mockSongs, mockComments, mockPosts, mockEncyclopediaArticles } from './mockData.js';
+import { Team, Song, VoteRecord, TeamComment, DanceInvitation, User, TeamPost, BattleRecord, TeamFriendship, Notification, UserFavorite, CheckInRecord, EncyclopediaArticle, Recruitment } from '../../shared/types.js';
+import { mockTeams, mockSongs, mockComments, mockPosts, mockEncyclopediaArticles, mockRecruitments } from './mockData.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -28,6 +28,7 @@ export interface DatabaseSchema {
   userFavorites: UserFavorite[];
   checkIns: CheckInRecord[];
   encyclopediaArticles: EncyclopediaArticle[];
+  recruitments: Recruitment[];
 }
 
 const file = path.join(dataDir, 'db.json');
@@ -46,7 +47,8 @@ const defaultData: DatabaseSchema = {
   notifications: [],
   userFavorites: [],
   checkIns: [],
-  encyclopediaArticles: []
+  encyclopediaArticles: [],
+  recruitments: []
 };
 
 export const db = new Low<DatabaseSchema>(adapter, defaultData);
@@ -157,6 +159,10 @@ export async function initDatabase(): Promise<void> {
   if (!db.data.encyclopediaArticles) {
     db.data.encyclopediaArticles = [];
   }
+
+  if (!db.data.recruitments) {
+    db.data.recruitments = [];
+  }
   
   if (!db.data.teams || db.data.teams.length === 0) {
     const mockUsers = generateMockUsers();
@@ -168,6 +174,7 @@ export async function initDatabase(): Promise<void> {
     db.data.posts = mockPosts;
     db.data.battleRecords = [];
     db.data.encyclopediaArticles = mockEncyclopediaArticles;
+    db.data.recruitments = mockRecruitments;
     await db.write();
     console.log('Database initialized with mock data');
   } else {

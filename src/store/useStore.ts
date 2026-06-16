@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist, ActivityWithTeam, TeamPhoto } from '../../shared/types';
-import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi } from '../services/api';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist, ActivityWithTeam, TeamPhoto, Recruitment, RecruitmentWithTeam, CreateRecruitmentRequest } from '../../shared/types';
+import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi, recruitmentApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface FilterState {
@@ -992,6 +992,100 @@ export const useActivityStore = create<ActivityState>((set) => ({
       set({ activities: activitiesWithTeam, loading: false });
     } catch (error) {
       set({ error: '获取活动列表失败', loading: false });
+    }
+  },
+}));
+
+interface RecruitmentState {
+  recruitments: RecruitmentWithTeam[];
+  teamRecruitments: Recruitment[];
+  latestRecruitments: RecruitmentWithTeam[];
+  loading: boolean;
+  error: string | null;
+  total: number;
+  fetchRecruitments: (filters?: { status?: 'active' | 'closed'; teamId?: number; page?: number; pageSize?: number }) => Promise<void>;
+  fetchTeamRecruitments: (teamId: number) => Promise<void>;
+  fetchLatestRecruitments: (limit?: number) => Promise<void>;
+  createRecruitment: (data: CreateRecruitmentRequest) => Promise<{ success: boolean; message?: string }>;
+  updateRecruitment: (id: number, data: Partial<Recruitment>) => Promise<{ success: boolean; message?: string }>;
+  deleteRecruitment: (id: number) => Promise<{ success: boolean; message?: string }>;
+  closeRecruitment: (id: number) => Promise<{ success: boolean; message?: string }>;
+}
+
+export const useRecruitmentStore = create<RecruitmentState>((set, get) => ({
+  recruitments: [],
+  teamRecruitments: [],
+  latestRecruitments: [],
+  loading: false,
+  error: null,
+  total: 0,
+
+  fetchRecruitments: async (filters) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await recruitmentApi.getRecruitments(filters);
+      set({ recruitments: result.data, total: result.total, loading: false });
+    } catch (error) {
+      set({ error: '获取招募列表失败', loading: false });
+    }
+  },
+
+  fetchTeamRecruitments: async (teamId) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await recruitmentApi.getTeamRecruitments(teamId);
+      set({ teamRecruitments: result.recruitments, loading: false });
+    } catch (error) {
+      set({ error: '获取舞队招募列表失败', loading: false });
+    }
+  },
+
+  fetchLatestRecruitments: async (limit) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await recruitmentApi.getLatestRecruitments(limit);
+      set({ latestRecruitments: result.recruitments, loading: false });
+    } catch (error) {
+      set({ error: '获取最新招募失败', loading: false });
+    }
+  },
+
+  createRecruitment: async (data) => {
+    try {
+      const result = await recruitmentApi.createRecruitment(data);
+      if (result.success && result.recruitment) {
+        await get().fetchTeamRecruitments(data.teamId);
+      }
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '发布招募公告失败' };
+    }
+  },
+
+  updateRecruitment: async (id, data) => {
+    try {
+      const result = await recruitmentApi.updateRecruitment(id, data);
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '更新招募公告失败' };
+    }
+  },
+
+  deleteRecruitment: async (id) => {
+    try {
+      const result = await recruitmentApi.deleteRecruitment(id);
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '删除招募公告失败' };
+    }
+  },
+
+  closeRecruitment: async (id) => {
+    try {
+      const result = await recruitmentApi.closeRecruitment(id);
+      return { success: result.success, message: result.message };
+    } catch (error) {
+      return { success: false, message: '结束招募失败' };
     }
   },
 }));

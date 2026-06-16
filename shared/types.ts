@@ -420,3 +420,74 @@ export interface ActivityWithTeam extends TeamActivity {
   teamAvatar: string;
   teamDistrict: string;
 }
+
+export interface Recruitment {
+  id: number;
+  teamId: number;
+  teamName?: string;
+  teamAvatar?: string;
+  teamDistrict?: string;
+  title: string;
+  description: string;
+  recruitCount: number;
+  minAge?: number;
+  maxAge?: number;
+  gender?: 'male' | 'female' | 'any';
+  contactName: string;
+  contactPhone: string;
+  contactWechat?: string;
+  requirements?: string;
+  benefits?: string;
+  status: 'active' | 'closed';
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecruitmentWithTeam extends Recruitment {
+  teamName: string;
+  teamAvatar: string;
+  teamDistrict: string;
+}
+
+export interface CreateRecruitmentRequest {
+  teamId: number;
+  title: string;
+  description: string;
+  recruitCount: number;
+  minAge?: number;
+  maxAge?: number;
+  gender?: 'male' | 'female' | 'any';
+  contactName: string;
+  contactPhone: string;
+  contactWechat?: string;
+  requirements?: string;
+  benefits?: string;
+}
+
+export interface UpdateRecruitmentRequest {
+  title?: string;
+  description?: string;
+  recruitCount?: number;
+  minAge?: number;
+  maxAge?: number;
+  gender?: 'male' | 'female' | 'any';
+  contactName?: string;
+  contactPhone?: string;
+  contactWechat?: string;
+  requirements?: string;
+  benefits?: string;
+  status?: 'active' | 'closed';
+}
+
+export interface RecruitmentResponse {
+  success: boolean;
+  recruitment?: Recruitment;
+  message?: string;
+}
+
+export interface RecruitmentListResponse {
+  data: RecruitmentWithTeam[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
