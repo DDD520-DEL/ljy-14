@@ -9,6 +9,7 @@ import PostCard from '../components/PostCard';
 import CreatePostModal from '../components/CreatePostModal';
 import HotVideosSection from '../components/HotVideosSection';
 import CheckInCalendar from '../components/CheckInCalendar';
+import ActivityCalendar from '../components/ActivityCalendar';
 
 export default function HomePage() {
   const { teams, fetchTeams } = useTeamStore();
@@ -226,6 +227,18 @@ export default function HomePage() {
               <p className="text-gray-500 text-lg">暂无符合条件的舞队</p>
             </div>
           )}
+        </div>
+
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-800" style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}>
+                📅 舞队活动日历
+              </h2>
+              <p className="text-gray-500 mt-1">查看各舞队的排练、演出、比赛等活动安排</p>
+            </div>
+          </div>
+          <ActivityCalendar />
         </div>
 
         <HotVideosSection limit={6} />

@@ -382,3 +382,31 @@ export interface EncyclopediaListResponse {
   page: number;
   pageSize: number;
 }
+
+export type ActivityType = 'rehearsal' | 'performance' | 'competition' | 'other';
+
+export interface TeamActivity {
+  id: number;
+  teamId: number;
+  teamName?: string;
+  teamAvatar?: string;
+  teamDistrict?: string;
+  title: string;
+  type: ActivityType;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  parkLat?: number;
+  parkLng?: number;
+  coverImage?: string;
+  participants?: number;
+  createdAt: string;
+}
+
+export interface ActivityWithTeam extends TeamActivity {
+  teamName: string;
+  teamAvatar: string;
+  teamDistrict: string;
+}
