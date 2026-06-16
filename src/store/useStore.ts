@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist } from '../../shared/types';
+import { Team, Song, BattlePair, TeamComment, CreateCommentRequest, InvitationWithTeamNames, CreateInvitationRequest, User, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, TeamFriendshipWithDetails, CreateFriendshipRequest, Notification, CheckInStatus, CheckInRecord, Playlist, ActivityWithTeam } from '../../shared/types';
 import { teamApi, rankingApi, battleApi, mapApi, voteApi, commentApi, invitationApi, userApi, postApi, friendshipApi, notificationApi, favoriteApi, checkInApi } from '../services/api';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
@@ -915,3 +915,36 @@ export const usePlaylistStore = create<PlaylistState>()(
     }
   )
 );
+
+interface ActivityState {
+  activities: ActivityWithTeam[];
+  loading: boolean;
+  error: string | null;
+  fetchActivities: () => Promise<void>;
+}
+
+export const useActivityStore = create<ActivityState>((set) => ({
+  activities: [],
+  loading: false,
+  error: null,
+
+  fetchActivities: async () => {
+    set({ loading: true, error: null });
+    try {
+      const { mockActivities } = await import('../../api/db/mockData');
+      const { mockTeams } = await import('../../api/db/mockData');
+      const activitiesWithTeam: ActivityWithTeam[] = mockActivities.map(activity => {
+        const team = mockTeams.find(t => t.id === activity.teamId);
+        return {
+          ...activity,
+          teamName: team?.name || '未知舞队',
+          teamAvatar: team?.avatar || '',
+          teamDistrict: team?.district || '',
+        };
+      });
+      set({ activities: activitiesWithTeam, loading: false });
+    } catch (error) {
+      set({ error: '获取活动列表失败', loading: false });
+    }
+  },
+}));

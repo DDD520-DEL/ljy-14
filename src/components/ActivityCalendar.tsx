@@ -1,8 +1,7 @@
-import { useState, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, CalendarDays, MapPin, Music, Trophy, Mic2 } from 'lucide-react';
-import { ActivityWithTeam, ActivityType } from '../../shared/types';
-import { mockActivities } from '../../api/db/mockData';
-import { mockTeams } from '../../api/db/mockData';
+import { useState, useMemo, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, CalendarDays, MapPin, Music, Trophy, Mic2, Loader2 } from 'lucide-react';
+import { ActivityType } from '../../shared/types';
+import { useActivityStore } from '../store/useStore';
 import ActivityModal from './ActivityModal';
 
 const districts = ['全部区域', '朝阳区', '海淀区', '东城区', '西城区', '丰台区', '石景山区', '通州区', '昌平区', '大兴区', '顺义区'];
@@ -15,30 +14,23 @@ const activityTypeConfig: Record<ActivityType, { label: string; color: string; b
 };
 
 export default function ActivityCalendar() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 5, 1));
+  const { activities, loading, fetchActivities } = useActivityStore();
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDistrict, setSelectedDistrict] = useState('全部区域');
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
 
+  useEffect(() => {
+    fetchActivities();
+  }, []);
+
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  const activitiesWithTeam: ActivityWithTeam[] = useMemo(() => {
-    return mockActivities.map(activity => {
-      const team = mockTeams.find(t => t.id === activity.teamId);
-      return {
-        ...activity,
-        teamName: team?.name || '未知舞队',
-        teamAvatar: team?.avatar || '',
-        teamDistrict: team?.district || '',
-      };
-    });
-  }, []);
-
   const filteredActivities = useMemo(() => {
-    if (selectedDistrict === '全部区域') return activitiesWithTeam;
-    return activitiesWithTeam.filter(a => a.teamDistrict === selectedDistrict);
-  }, [activitiesWithTeam, selectedDistrict]);
+    if (selectedDistrict === '全部区域') return activities;
+    return activities.filter(a => a.teamDistrict === selectedDistrict);
+  }, [activities, selectedDistrict]);
 
   const getDaysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
   const getFirstDayOfMonth = (y: number, m: number) => new Date(y, m, 1).getDay();
@@ -47,7 +39,7 @@ export default function ActivityCalendar() {
   const firstDay = getFirstDayOfMonth(year, month);
   const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
 
-  const today = new Date(2026, 5, 16);
+  const today = new Date();
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
   const todayDate = today.getDate();
 
@@ -105,6 +97,14 @@ export default function ActivityCalendar() {
       other: monthActs.filter(a => a.type === 'other').length,
     };
   }, [filteredActivities, year, month, daysInMonth]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-3xl shadow-2xl p-12 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-3xl shadow-2xl overflow-hidden animate-fadeInUp">
