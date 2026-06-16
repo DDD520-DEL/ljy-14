@@ -329,3 +329,26 @@ export const encyclopediaApi = {
       method: 'DELETE',
     }),
 };
+
+export interface DistrictStats {
+  district: string;
+  count: number;
+  percentage: number;
+}
+
+export interface DailyVoteStats {
+  date: string;
+  count: number;
+}
+
+export interface DashboardStats {
+  totalTeams: number;
+  totalSongs: number;
+  todayVotes: number;
+  districtStats: DistrictStats[];
+  last7DaysVotes: DailyVoteStats[];
+}
+
+export const statsApi = {
+  getDashboardStats: () => request<DashboardStats>('/stats/dashboard'),
+};

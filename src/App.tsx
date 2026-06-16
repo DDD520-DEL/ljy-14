@@ -13,6 +13,7 @@ import RelationGraphPage from "@/pages/RelationGraphPage";
 import EncyclopediaPage from "@/pages/EncyclopediaPage";
 import EncyclopediaDetailPage from "@/pages/EncyclopediaDetailPage";
 import PlaylistPage from "@/pages/PlaylistPage";
+import DashboardPage from "@/pages/DashboardPage";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="/encyclopedia" element={<EncyclopediaPage />} />
           <Route path="/encyclopedia/:id" element={<EncyclopediaDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
         </Routes>
         <NicknameModal />
       </div>
