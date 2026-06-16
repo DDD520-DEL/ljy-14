@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Trophy, Music, Shirt, Crown, Star, Heart, Users, Flame, Clock } from 'lucide-react';
 import { useRankingStore } from '../store/useStore';
 import { Link } from 'react-router-dom';
 import { Team, Song } from '../../shared/types';
+import GenreTagCloud from '../components/GenreTagCloud';
 
 type TabType = 'comprehensive' | 'addict' | 'costume';
 type AddictSubTabType = 'total' | 'weekly';
@@ -10,11 +11,23 @@ type AddictSubTabType = 'total' | 'weekly';
 export default function RankingPage() {
   const [activeTab, setActiveTab] = useState<TabType>('comprehensive');
   const [addictSubTab, setAddictSubTab] = useState<AddictSubTabType>('total');
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
   const { comprehensiveRanking, addictRanking, weeklyAddictRanking, costumeRanking, loading, error, fetchAllRankings } = useRankingStore();
 
   useEffect(() => {
     fetchAllRankings();
   }, []);
+
+  useEffect(() => {
+    setSelectedGenre(null);
+  }, [addictSubTab]);
+
+  const currentAddictData = addictSubTab === 'weekly' ? weeklyAddictRanking : addictRanking;
+
+  const filteredAddictData = useMemo(() => {
+    if (!selectedGenre) return currentAddictData;
+    return currentAddictData.filter(song => song.genre === selectedGenre);
+  }, [currentAddictData, selectedGenre]);
 
   const tabs = [
     { id: 'comprehensive' as TabType, label: '综合排行榜', icon: Crown, color: 'from-yellow-500 to-orange-500' },
@@ -152,7 +165,6 @@ export default function RankingPage() {
     const isWeekly = addictSubTab === 'weekly';
     const currentLoading = isWeekly ? loading.weeklyAddict : loading.addict;
     const currentError = isWeekly ? error.weeklyAddict : error.addict;
-    const currentData = isWeekly ? weeklyAddictRanking : addictRanking;
 
     if (currentLoading) {
       return <div className="flex justify-center py-20"><div className="animate-spin rounded-full h-12 w-12 border-4 border-red-500 border-t-transparent"></div></div>;
@@ -160,13 +172,38 @@ export default function RankingPage() {
     if (currentError) {
       return <div className="text-center py-20 text-red-500">{currentError}</div>;
     }
-    if (isWeekly && currentData.length === 0) {
+    if (isWeekly && currentAddictData.length === 0) {
       return renderAddictEmptyState();
+    }
+
+    if (filteredAddictData.length === 0 && selectedGenre) {
+      return (
+        <div className="bg-white rounded-3xl shadow-xl p-12 text-center animate-fadeInUp">
+          <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Music className="w-12 h-12 text-gray-400" />
+          </div>
+          <h3 
+            className="text-2xl font-bold text-gray-800 mb-3"
+            style={{ fontFamily: "'ZCOOL KuaiLe', cursive" }}
+          >
+            该曲风暂无上榜歌曲
+          </h3>
+          <p className="text-gray-500 max-w-md mx-auto mb-6">
+            当前「{selectedGenre}」曲风没有上榜歌曲，试试选择其他曲风吧！
+          </p>
+          <button
+            onClick={() => setSelectedGenre(null)}
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+          >
+            <span>查看全部曲风</span>
+          </button>
+        </div>
+      );
     }
 
     return (
       <div className="space-y-4">
-        {currentData.map((song: (Song & { teamName: string; weeklyAddictScore?: number; weeklyAddictVotes?: number }), index: number) => {
+        {filteredAddictData.map((song: (Song & { teamName: string; weeklyAddictScore?: number; weeklyAddictVotes?: number }), index: number) => {
           const score = isWeekly && song.weeklyAddictScore !== undefined ? song.weeklyAddictScore : song.addictScore;
           const votes = isWeekly && song.weeklyAddictVotes !== undefined ? song.weeklyAddictVotes : song.addictVotes;
           
@@ -344,6 +381,11 @@ export default function RankingPage() {
         {activeTab === 'addict' && (
           <>
             {renderAddictSubTabs()}
+            <GenreTagCloud
+              songs={currentAddictData}
+              selectedGenre={selectedGenre}
+              onGenreSelect={setSelectedGenre}
+            />
             {renderAddictRanking()}
           </>
         )}
