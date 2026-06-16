@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, Plus, ListMusic, Check } from 'lucide-react';
 import { usePlaylistStore } from '../store/useStore';
 
@@ -13,31 +13,58 @@ export default function AddToPlaylistModal({ songId, isOpen, onClose }: AddToPla
   const [newPlaylistName, setNewPlaylistName] = useState('');
   const [showCreate, setShowCreate] = useState(false);
   const [message, setMessage] = useState('');
+  const messageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      if (messageTimerRef.current) {
+        clearTimeout(messageTimerRef.current);
+        messageTimerRef.current = null;
+      }
+      setMessage('');
+      setNewPlaylistName('');
+      setShowCreate(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (messageTimerRef.current) {
+        clearTimeout(messageTimerRef.current);
+      }
+    };
+  }, []);
+
+  const setMessageWithTimer = (msg: string, duration: number) => {
+    if (messageTimerRef.current) {
+      clearTimeout(messageTimerRef.current);
+    }
+    setMessage(msg);
+    messageTimerRef.current = setTimeout(() => {
+      setMessage('');
+      messageTimerRef.current = null;
+    }, duration);
+  };
 
   if (!isOpen) return null;
 
   const handleAddToPlaylist = (playlistId: string) => {
     if (isSongInPlaylist(playlistId, songId)) return;
     addSongToPlaylist(playlistId, songId);
-    setMessage('已添加到歌单！');
-    setTimeout(() => {
-      setMessage('');
-    }, 1500);
+    setMessageWithTimer('已添加到歌单！', 1500);
   };
 
   const handleCreateAndAdd = () => {
     const trimmed = newPlaylistName.trim();
     if (!trimmed) {
-      setMessage('请输入歌单名称');
-      setTimeout(() => setMessage(''), 2000);
+      setMessageWithTimer('请输入歌单名称', 2000);
       return;
     }
     const id = createPlaylist(trimmed);
     addSongToPlaylist(id, songId);
     setNewPlaylistName('');
     setShowCreate(false);
-    setMessage('已创建歌单并添加！');
-    setTimeout(() => setMessage(''), 1500);
+    setMessageWithTimer('已创建歌单并添加！', 1500);
   };
 
   return (

@@ -18,6 +18,7 @@ export default function PlaylistPage() {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
+  const activePlaylistIdRef = useRef<string | null>(null);
 
   const selectedPlaylist = playlists.find(p => p.id === selectedPlaylistId) || null;
 
@@ -33,21 +34,34 @@ export default function PlaylistPage() {
   const selectedPlaylistSongIds = selectedPlaylist?.songs.map(s => s.songId).join(',') || '';
 
   useEffect(() => {
+    activePlaylistIdRef.current = selectedPlaylistId;
+
     const fetchSongs = async () => {
+      const currentPlaylistId = selectedPlaylistId;
       if (!selectedPlaylist || selectedPlaylist.songs.length === 0) {
-        setSongs([]);
+        if (activePlaylistIdRef.current === currentPlaylistId) {
+          setSongs([]);
+          setLoading(false);
+        }
         return;
       }
       setLoading(true);
       try {
         const songIds = selectedPlaylist.songs.map(s => s.songId);
         const result = await teamApi.getSongsByIds(songIds);
-        setSongs(result);
+        if (activePlaylistIdRef.current === currentPlaylistId) {
+          setSongs(result);
+        }
       } catch (error) {
-        console.error('获取歌曲详情失败', error);
-        setSongs([]);
+        if (activePlaylistIdRef.current === currentPlaylistId) {
+          console.error('获取歌曲详情失败', error);
+          setSongs([]);
+        }
+      } finally {
+        if (activePlaylistIdRef.current === currentPlaylistId) {
+          setLoading(false);
+        }
       }
-      setLoading(false);
     };
     fetchSongs();
   }, [selectedPlaylistId, selectedPlaylistSongIds]);
