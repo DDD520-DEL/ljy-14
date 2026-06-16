@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MessageSquare, CheckCircle, Clock, Trash2, Filter, RefreshCw, Loader2, ChevronLeft, ChevronRight, Eye, User, Phone } from 'lucide-react';
+import { MessageSquare, CheckCircle, Clock, Trash2, Filter, RefreshCw, Loader2, ChevronLeft, ChevronRight, Eye, User, Phone, X } from 'lucide-react';
 import { feedbackApi, Feedback, FeedbackStatus } from '../services/api';
 
 const PAGE_SIZE = 10;
@@ -33,7 +33,7 @@ function FeedbackDetailModal({ feedback, onClose }: { feedback: Feedback; onClos
             onClick={onClose}
             className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition-colors"
           >
-            <Eye className="w-5 h-5 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
           <div className="w-14 h-14 mx-auto mb-3 bg-white/20 rounded-full flex items-center justify-center">
             <MessageSquare className="w-7 h-7 text-white" />
@@ -97,6 +97,8 @@ function FeedbackDetailModal({ feedback, onClose }: { feedback: Feedback; onClos
 export default function FeedbackManagementPage() {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [total, setTotal] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [processedCount, setProcessedCount] = useState(0);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | 'all'>('all');
   const [loading, setLoading] = useState(true);
@@ -104,17 +106,31 @@ export default function FeedbackManagementPage() {
   const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
+  const fetchStats = async () => {
+    try {
+      const result = await feedbackApi.getFeedbacks({ pageSize: 1000 });
+      const allFeedbacks = result.data;
+      setPendingCount(allFeedbacks.filter(f => f.status === 'pending').length);
+      setProcessedCount(allFeedbacks.filter(f => f.status === 'processed').length);
+    } catch (error) {
+      console.error('获取统计数据失败:', error);
+    }
+  };
+
   const fetchFeedbacks = async (showRefreshing = false) => {
     if (showRefreshing) setRefreshing(true);
     setLoading(true);
     try {
-      const result = await feedbackApi.getFeedbacks({
-        status: statusFilter === 'all' ? undefined : statusFilter,
-        page,
-        pageSize: PAGE_SIZE
-      });
-      setFeedbacks(result.data);
-      setTotal(result.total);
+      const [listResult] = await Promise.all([
+        feedbackApi.getFeedbacks({
+          status: statusFilter === 'all' ? undefined : statusFilter,
+          page,
+          pageSize: PAGE_SIZE
+        }),
+        fetchStats()
+      ]);
+      setFeedbacks(listResult.data);
+      setTotal(listResult.total);
     } catch (error) {
       console.error('获取反馈列表失败:', error);
     } finally {
@@ -139,6 +155,7 @@ export default function FeedbackManagementPage() {
         setFeedbacks(prev => prev.map(f => 
           f.id === id ? result.feedback! : f
         ));
+        await fetchStats();
       }
     } catch (error) {
       console.error('更新状态失败:', error);
@@ -156,6 +173,7 @@ export default function FeedbackManagementPage() {
       if (result.success) {
         setFeedbacks(prev => prev.filter(f => f.id !== id));
         setTotal(prev => prev - 1);
+        await fetchStats();
       }
     } catch (error) {
       console.error('删除失败:', error);
@@ -165,8 +183,6 @@ export default function FeedbackManagementPage() {
   };
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
-  const pendingCount = feedbacks.filter(f => f.status === 'pending').length;
-  const processedCount = feedbacks.filter(f => f.status === 'processed').length;
 
   if (loading && !refreshing) {
     return (
