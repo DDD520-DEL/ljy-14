@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2, BookOpen, ListMusic, BarChart3 } from 'lucide-react';
+import { Music, Users, Map, Trophy, Swords, Menu, X, Heart, User, Link2, BookOpen, ListMusic, BarChart3, MessageSquare } from 'lucide-react';
 import { useFavoriteStore, useUserStore, usePlaylistStore } from '../store/useStore';
 import NotificationCenter from './NotificationCenter';
 
@@ -28,6 +28,7 @@ export default function Navbar() {
     { path: '/ranking', label: '排行榜', icon: Trophy },
     { path: '/relation-graph', label: '关系图谱', icon: Link2 },
     { path: '/dashboard', label: '数据统计', icon: BarChart3 },
+    { path: '/feedbacks', label: '反馈管理', icon: MessageSquare },
   ];
 
   const isActive = (path: string) => location.pathname === path;

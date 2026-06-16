@@ -1,4 +1,76 @@
-import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, TeamPhoto, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse, Recruitment, RecruitmentWithTeam, CreateRecruitmentRequest, UpdateRecruitmentRequest, RecruitmentResponse, RecruitmentListResponse } from '../../shared/types';
+import { Team, Song, BattlePair, VoteResponse, PaginatedResponse, TeamComment, CreateCommentRequest, CreateCommentResponse, DanceInvitation, CreateInvitationRequest, InvitationResponse, InvitationWithTeamNames, User, UserResponse, CreateUserRequest, VoteRecordWithDetails, TeamCommentWithTeam, TeamPost, TeamPostWithTeam, CreatePostRequest, PostResponse, ImportResult, TeamVideo, TeamPhoto, BattleRecord, TeamFriendship, TeamFriendshipWithDetails, CreateFriendshipRequest, FriendshipResponse, Notification, CheckInRecord, CheckInStatus, CheckInResponse, EncyclopediaArticle, EncyclopediaCategory, CreateEncyclopediaRequest, UpdateEncyclopediaRequest, EncyclopediaResponse, EncyclopediaListResponse, Recruitment, RecruitmentWithTeam, CreateRecruitmentRequest, UpdateRecruitmentRequest, RecruitmentResponse, RecruitmentListResponse, Feedback, FeedbackStatus, CreateFeedbackRequest, FeedbackResponse, FeedbackListResponse } from '../../shared/types';
+
+export type {
+  Team,
+  Song,
+  BattlePair,
+  VoteResponse,
+  PaginatedResponse,
+  TeamComment,
+  CreateCommentRequest,
+  CreateCommentResponse,
+  DanceInvitation,
+  CreateInvitationRequest,
+  InvitationResponse,
+  InvitationWithTeamNames,
+  User,
+  UserResponse,
+  CreateUserRequest,
+  VoteRecordWithDetails,
+  TeamCommentWithTeam,
+  TeamPost,
+  TeamPostWithTeam,
+  CreatePostRequest,
+  PostResponse,
+  ImportResult,
+  TeamVideo,
+  TeamPhoto,
+  BattleRecord,
+  TeamFriendship,
+  TeamFriendshipWithDetails,
+  CreateFriendshipRequest,
+  FriendshipResponse,
+  Notification,
+  CheckInRecord,
+  CheckInStatus,
+  CheckInResponse,
+  EncyclopediaArticle,
+  EncyclopediaCategory,
+  CreateEncyclopediaRequest,
+  UpdateEncyclopediaRequest,
+  EncyclopediaResponse,
+  EncyclopediaListResponse,
+  Recruitment,
+  RecruitmentWithTeam,
+  CreateRecruitmentRequest,
+  UpdateRecruitmentRequest,
+  RecruitmentResponse,
+  RecruitmentListResponse,
+  Feedback,
+  FeedbackStatus,
+  CreateFeedbackRequest,
+  FeedbackResponse,
+  FeedbackListResponse,
+};
+
+export interface DistrictStats {
+  district: string;
+  count: number;
+  percentage: number;
+}
+
+export interface DailyVoteStats {
+  date: string;
+  count: number;
+}
+
+export interface DashboardStats {
+  totalTeams: number;
+  totalSongs: number;
+  todayVotes: number;
+  districtStats: DistrictStats[];
+  last7DaysVotes: DailyVoteStats[];
+}
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`/api${url}`, {
@@ -350,25 +422,6 @@ export const encyclopediaApi = {
     }),
 };
 
-export interface DistrictStats {
-  district: string;
-  count: number;
-  percentage: number;
-}
-
-export interface DailyVoteStats {
-  date: string;
-  count: number;
-}
-
-export interface DashboardStats {
-  totalTeams: number;
-  totalSongs: number;
-  todayVotes: number;
-  districtStats: DistrictStats[];
-  last7DaysVotes: DailyVoteStats[];
-}
-
 export const statsApi = {
   getDashboardStats: () => request<DashboardStats>('/stats/dashboard'),
 };
@@ -420,5 +473,40 @@ export const recruitmentApi = {
   closeRecruitment: (id: number) =>
     request<RecruitmentResponse>(`/recruitments/${id}/close`, {
       method: 'PUT',
+    }),
+};
+
+export const feedbackApi = {
+  getFeedbacks: (filters?: {
+    status?: FeedbackStatus;
+    page?: number;
+    pageSize?: number;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.status) params.append('status', filters.status);
+    if (filters?.page !== undefined) params.append('page', filters.page.toString());
+    if (filters?.pageSize !== undefined) params.append('pageSize', filters.pageSize.toString());
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return request<FeedbackListResponse>(`/feedbacks${query}`);
+  },
+
+  getFeedbackById: (id: number) =>
+    request<FeedbackResponse>(`/feedbacks/${id}`),
+
+  createFeedback: (data: CreateFeedbackRequest) =>
+    request<FeedbackResponse>('/feedbacks', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  updateFeedbackStatus: (id: number, status: FeedbackStatus) =>
+    request<FeedbackResponse>(`/feedbacks/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+
+  deleteFeedback: (id: number) =>
+    request<{ success: boolean; message?: string }>(`/feedbacks/${id}`, {
+      method: 'DELETE',
     }),
 };

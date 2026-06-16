@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import NicknameModal from "@/components/NicknameModal";
+import FeedbackButton from "@/components/FeedbackButton";
 import HomePage from "@/pages/HomePage";
 import TeamListPage from "@/pages/TeamListPage";
 import TeamDetailPage from "@/pages/TeamDetailPage";
@@ -14,6 +15,7 @@ import EncyclopediaPage from "@/pages/EncyclopediaPage";
 import EncyclopediaDetailPage from "@/pages/EncyclopediaDetailPage";
 import PlaylistPage from "@/pages/PlaylistPage";
 import DashboardPage from "@/pages/DashboardPage";
+import FeedbackManagementPage from "@/pages/FeedbackManagementPage";
 
 export default function App() {
   return (
@@ -34,8 +36,10 @@ export default function App() {
           <Route path="/encyclopedia/:id" element={<EncyclopediaDetailPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/feedbacks" element={<FeedbackManagementPage />} />
         </Routes>
         <NicknameModal />
+        <FeedbackButton />
       </div>
     </Router>
   );

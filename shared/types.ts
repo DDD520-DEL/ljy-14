@@ -491,3 +491,40 @@ export interface RecruitmentListResponse {
   page: number;
   pageSize: number;
 }
+
+export type FeedbackStatus = 'pending' | 'processed';
+
+export interface Feedback {
+  id: number;
+  content: string;
+  contact: string;
+  status: FeedbackStatus;
+  userId?: number;
+  userNickname?: string;
+  createdAt: string;
+  processedAt?: string;
+}
+
+export interface CreateFeedbackRequest {
+  content: string;
+  contact: string;
+  userId?: number;
+  userNickname?: string;
+}
+
+export interface UpdateFeedbackStatusRequest {
+  status: FeedbackStatus;
+}
+
+export interface FeedbackResponse {
+  success: boolean;
+  feedback?: Feedback;
+  message?: string;
+}
+
+export interface FeedbackListResponse {
+  data: Feedback[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
